@@ -31,6 +31,14 @@ st.markdown(
         justify-content: center;
     }
 
+    [data-testid="column"]:has(div.NoBorder) { 
+        padding: 0px;
+        border-radius: 0px;
+        box-shadow: none;
+        display: flex;
+        justify-content: center;
+    }
+
     [class="row-widget stSelectbox"] {
         display:flex;
         align-items: center;
@@ -40,18 +48,24 @@ st.markdown(
         height: 10px;
     }
 
-    .css-c6gdys{
-        padding:0px;
-    }
 </style>
 """,
     unsafe_allow_html=True,
 )
 
-st.title('DDS EASTERN')
+cola, colb = st.columns([6,1])
+with cola:
+    st.title('DDS EASTERN')
+    st.write("""<div class='NoBorder' style='margin:0px;'/>""", unsafe_allow_html=True)
+with colb:
+    selected_type = colb.date_input(
+    'Daily',
+    datetime.date(2023,7,4), 
+    label_visibility="hidden")
+    st.write("""<div class='NoBorder' style='margin:0px;'/>""", unsafe_allow_html=True)
+
 
 col1, col2, col3, col4 = st.columns([2,2,3,2])
-data = np.random.randn(31, 1)
 
 with col1:
     with st.container():
@@ -83,26 +97,58 @@ with col3:
     col3a, col3b, col3c = st.columns(3)
     col3d, col3e, col3f = st.columns(3)
     with col3a:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> MoM </div> <div style="font-weight: 900; font-size: 22px; margin:10px 0px; padding:0; display: flex; justify-content: center;"> -4.5% </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> MoM </div> ', unsafe_allow_html=True)
         st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
     with col3b:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> YtD </div> <div style="font-weight: 900; font-size: 22px; margin:10px 0px; padding:0; display: flex; justify-content: center;"> -19.4% </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> YtD </div>', unsafe_allow_html=True)
         st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
     with col3c:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> YoY </div> <div style="font-weight: 900; font-size: 22px; margin:10px 0px; padding:0; display: flex; justify-content: center;"> -24.0% </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> YoY </div>', unsafe_allow_html=True)
+        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+    with col3d:
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> -4.5% </div>', unsafe_allow_html=True)
+        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+    with col3e:
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> -19.4% </div>', unsafe_allow_html=True)
+        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+    with col3f:
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> -24.0% </div>', unsafe_allow_html=True)
         st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 
 with col4:
     col4a, col4b = st.columns(2)
+    col4c, col4d = st.columns(2)
     with col4a:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> RGB </div> <div style="font-weight: 900; font-size: 22px; margin:10px 0px; padding:0; display: flex; justify-content: center;"> 1.2Mn </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> RGB </div>', unsafe_allow_html=True)
         st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
     with col4b:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> MoM </div> <div style="font-weight: 900; font-size: 22px; margin:10px 0px; padding:0; display: flex; justify-content: center;"> -0.61% </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> MoM </div>', unsafe_allow_html=True)
+        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+    with col4c:
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> 1.2Mn </div>', unsafe_allow_html=True)
+        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+    with col4d:
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> -0.61% </div>', unsafe_allow_html=True)
         st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 col6, col7 = st.columns([5,2])
+data = pd.DataFrame({
+    "Date": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"],
+    "Rev1":  [150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 3],
+    "Rev2":  [150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 3],
+    "Rev3":  [150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 3]
+})
+data2 = pd.DataFrame({
+    "Month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"],
+    "Rev1":  [20, 50, 120, 90, 10, 63, 23, 79, 53, 56, 64, 246],
+    "Rev2":  [20, 50, 120, 90, 10, 63, 23, 79, 53, 56, 64, 246],
+    "Rev3":  [20, 50, 120, 90, 10, 63, 23, 79, 53, 56, 64, 246]
+})
+
+data11 = pd.DataFrame(
+    np.random.randn(31, 3),
+    columns=['a', 'b', 'c'])
 
 with col6:
     col6a, col6b = st.columns([4,1])
@@ -113,7 +159,10 @@ with col6:
 
     
     st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
-    st.line_chart(data)
+    if(selected_type == 'Daily'):
+        st.line_chart(data11)
+    else:
+        st.line_chart(data11)
 
 with col7:
     st.subheader("By Cluster")
