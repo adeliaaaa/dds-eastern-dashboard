@@ -15,13 +15,13 @@ st.set_page_config(layout="wide")
 st.markdown(
     """
 <style>
-    [data-testid="column"] {
-        display: flex;
-        align-items: center;
-        box-shadow: rgb(0 0 0 / 20%) 0px 2px 1px -1px, rgb(0 0 0 / 14%) 0px 1px 1px 0px, rgb(0 0 0 / 12%) 0px 1px 3px 0px;
-        border-radius: 15px;
-        padding: 2% 2% 2% 2%;
-    } 
+    # [data-testid="column"] {
+    #     display: flex;
+    #     align-items: center;
+    #     box-shadow: rgb(0 0 0 / 20%) 0px 2px 1px -1px, rgb(0 0 0 / 14%) 0px 1px 1px 0px, rgb(0 0 0 / 12%) 0px 1px 3px 0px;
+    #     border-radius: 15px;
+    #     padding: 2% 2% 2% 2%;
+    # } 
 </style>
 """,
     unsafe_allow_html=True,

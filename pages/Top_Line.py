@@ -15,37 +15,39 @@ st.set_page_config(layout="wide")
 st.markdown(
     """
 <style>
-    [data-testid="column"] {
+    [data-testid="column"]:has(div.PortMaker) {
         display: flex;
         align-items: center;
         box-shadow: rgb(0 0 0 / 20%) 0px 2px 1px -1px, rgb(0 0 0 / 14%) 0px 1px 1px 0px, rgb(0 0 0 / 12%) 0px 1px 3px 0px;
         border-radius: 15px;
-        padding: 2% 2% 2% 2%;
+        padding: 1% 1% 1% 1%;
     }
 
-    [data-testid="column"]:has(div.PortMarker) [data-testid="column"] { 
-        padding: 0px;
-        border-radius: 0px;
-        box-shadow: none;
+    [data-testid="column"] {
         display: flex;
-        justify-content: center;
-    }
-
-    [data-testid="column"]:has(div.NoBorder) { 
-        padding: 0px;
-        border-radius: 0px;
-        box-shadow: none;
-        display: flex;
-        justify-content: center;
-    }
-
-    [class="row-widget stSelectbox"] {
-        display:flex;
-        align-items: center;
+        align-items: flex-start;
     }
 
     .stProgress .st-au {
         height: 10px;
+    }
+
+    .stDateInput label{
+        display:none;
+    }
+
+    .stSelectbox label{
+        display:none;
+    }
+
+    h1 {
+        margin: 0px;
+        padding: 0px;
+    }
+
+    h3 {
+        margin: 0px;
+        padding: 0px;
     }
 
 </style>
@@ -56,81 +58,88 @@ st.markdown(
 cola, colb = st.columns([6,1])
 with cola:
     st.title('DDS EASTERN')
-    st.write("""<div class='NoBorder' style='margin:0px;'/>""", unsafe_allow_html=True)
 with colb:
     selected_type = colb.date_input(
     'Daily',
     datetime.date(2023,7,4), 
     label_visibility="hidden")
-    st.write("""<div class='NoBorder' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 
 col1, col2, col3, col4 = st.columns([2,2,3,2])
 
 with col1:
+    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
     with st.container():
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: flex-start"> REVENUE TO TARGET </div>', unsafe_allow_html=True)
-        bar = st.progress(90)
+        col1a, col1b = st.columns([3,1])
+        with col1a:
+            bar = st.progress(90)
+        with col1b:
+            st.write("90%")
     with st.container():
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: flex-start"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
-        bar = st.progress(50)
+        st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
+        col1a, col1b = st.columns([3,1])
+        with col1a:
+            bar = st.progress(45)
+        with col1b:
+            st.write("45%")
         
 
 with col2:
+    
     col2a, col2b = st.columns(2)
     col2c, col2d = st.columns(2)
 
     with col2a:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> TOTAL REV </div>', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
     with col2b:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> DAILY REV </div>', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker'/>""", unsafe_allow_html=True)
     with col2c:
         st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> 14.4 Bn </div>', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
     with col2d:
         st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> 1.2 Bn </div>', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker'/>""", unsafe_allow_html=True)
+    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 with col3:
+    
     col3a, col3b, col3c = st.columns(3)
     col3d, col3e, col3f = st.columns(3)
     with col3a:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> MoM </div> ', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+
     with col3b:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> YtD </div>', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+
     with col3c:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> YoY </div>', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+
     with col3d:
         st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> -4.5% </div>', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+
     with col3e:
         st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> -19.4% </div>', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+
     with col3f:
         st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> -24.0% </div>', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 
 with col4:
+
     col4a, col4b = st.columns(2)
     col4c, col4d = st.columns(2)
     with col4a:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> RGB </div>', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+        
     with col4b:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> MoM </div>', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+        
     with col4c:
         st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> 1.2Mn </div>', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+        
     with col4d:
         st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> -0.61% </div>', unsafe_allow_html=True)
-        st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)        
 
 col6, col7 = st.columns([5,2])
 data = pd.DataFrame({
@@ -151,14 +160,14 @@ data11 = pd.DataFrame(
     columns=['a', 'b', 'c'])
 
 with col6:
+    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
     col6a, col6b = st.columns([4,1])
     selected_type = col6b.selectbox(
     'Daily',
     ('Daily', 'Monthly'), label_visibility="hidden")
     col6a.subheader(f"Trend {selected_type} Revenue")
 
-    
-    st.write("""<div class='PortMarker' style='margin:0px;'/>""", unsafe_allow_html=True)
+
     if(selected_type == 'Daily'):
         st.line_chart(data11)
     else:
@@ -166,19 +175,20 @@ with col6:
 
 with col7:
     st.subheader("By Cluster")
+    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 col8, col9, col10 = st.columns([2,3,2])
 with col8:
-    st.subheader("REVENUE TO TARGET")
-    st.write("90%")
-    st.subheader("REVENUE CONTRIBUTION")
-    st.write("65%")
+    st.subheader("By Service")
+    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 with col9:
     st.subheader("Top 5 L4 Contributor")
+    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 with col10:
     st.subheader("OUTLET DIGITAL AKTIF & REV")
+    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 
 df = px.data.tips()
