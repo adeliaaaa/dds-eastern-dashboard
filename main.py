@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from datetime import date
 import plotly.express as px
+from PIL import Image
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -167,8 +168,15 @@ data2 = pd.DataFrame({
 })
 data2 = data2.set_index('Month')
 
-
-
+cluster = pd.DataFrame({
+    "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur"],
+    "Rev":  [300, 77, 95, 205, 179, 60]
+})
+clusterChart = px.pie(cluster, values='Rev', names='Cluster', color_discrete_sequence= px.colors.sequential.deep)
+clusterChart.update_layout(
+    showlegend=False
+)
+clusterChart.update_traces(textinfo='label+percent')
 with col6:
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
     col6a, col6b = st.columns([4,1])
@@ -203,6 +211,7 @@ with col6:
 with col7:
     st.subheader("By Cluster")
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
+    st.plotly_chart(clusterChart, use_container_width=True)
 
 top5 = pd.DataFrame({
     "Service": ["Videomax", "Google Playstore", "Ipoint", "Content", "Pulsa"],
@@ -216,16 +225,30 @@ top5 = top5.set_index('Service')
 
 outlet = pd.DataFrame({
     "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur"],
-    "M":  [205, 179, 110, 205, 179, 110],
-    "MoM":  ["0.08%", "0.10%", "0.05%", "0.08%", "0.10%", "0.05%"],
-    "YtD":  ["21.6jt", "17.2jt", "12.0jt", "21.6jt", "17.2jt", "12.0jt"],
+    "Outlet":  [205, 179, 110, 205, 179, 110],
+    "%":  ["0.08%", "0.10%", "0.05%", "0.08%", "0.10%", "0.05%"],
+    "Rev":  ["21.6jt", "17.2jt", "12.0jt", "21.6jt", "17.2jt", "12.0jt"],
 })
 outlet = outlet.set_index('Cluster')
+
+service = pd.DataFrame({
+    "Service": ["Digital Banking", "Vas Content", "Music", "Video", "Games Marketplace"],
+    "Rev":  [350, 221, 50, 198, 99]
+})
+serviceChart = px.pie(service, values='Rev', names='Service', color_discrete_sequence= px.colors.sequential.deep)
+
+serviceChart.update_layout(
+    showlegend=False
+)
+
+serviceChart.update_traces(textinfo='label+percent')
+# serviceChart.update_traces(textinfo='label+percent', textposition='outside')
 
 col8, col9, col10 = st.columns([2,3,2])
 with col8:
     st.subheader("By Service")
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
+    st.plotly_chart(serviceChart, use_container_width=True)
 
 with col9:
     st.subheader("Top 5 L4 Contributor")
