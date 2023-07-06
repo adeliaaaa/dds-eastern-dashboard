@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import date
-import datetime
 import plotly.express as px
 
 from dotenv import load_dotenv
@@ -50,6 +49,10 @@ st.markdown(
         padding: 0px;
     }
 
+    .stPlotlyChart {
+        width:100%;
+    }
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -61,7 +64,7 @@ with cola:
 with colb:
     selected_type = colb.date_input(
     'Daily',
-    datetime.date(2023,7,4), 
+    date.today(), 
     label_visibility="hidden")
 
 
@@ -144,20 +147,18 @@ with col4:
 col6, col7 = st.columns([5,2])
 data = pd.DataFrame({
     "Date": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"],
-    "Rev1":  [150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 3],
-    "Rev2":  [150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 3],
-    "Rev3":  [150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 150, 100, 30, 130, 80, 70, 170, 83, 70, 10, 3]
+    "Rev1":  [111, 117, 109, 111, 81, 70, 82, 80, 70, 71, 102, 100, 90, 102, 76, 70, 79, 82, 84, 69, 100, 103, 91, 78, 82, 72, 82, 62, 67, 111, 99],
+    "Rev2":  [108, 110, 116, 92, 77, 66, 80, 70, 69, 80, 111, 112, 109, 105, 78, 92, 98, 83, 83, 92, 89, 89, 69, 85, 79, 73, 78, 83, 80, 110, 87],
+    "Rev3":  [114, 121, 132, 119, 95, 98, 89, 78, 80, 93, 109, 99, 80, 112, 80, 91, 101, 92, 90, 82, 99, 107, 88, 98, 80, 71, 79, 83, 66, 100, 71]
 })
+data = data.set_index('Date')
 data2 = pd.DataFrame({
     "Month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"],
-    "Rev1":  [20, 50, 120, 90, 10, 63, 23, 79, 53, 56, 64, 246],
-    "Rev2":  [20, 50, 120, 90, 10, 63, 23, 79, 53, 56, 64, 246],
-    "Rev3":  [20, 50, 120, 90, 10, 63, 23, 79, 53, 56, 64, 246]
+    "Rev1":  [25, 45, 167, 70, 71, 46, 51, 94, 62, 56, 38, 112],
+    "Rev2":  [21, 66, 143, 83, 30, 63, 23, 79, 53, 61, 61, 142],
+    "Rev3":  [35, 73, 168, 89, 90, 99, 23, 92, 21, 42, 24, 99]
 })
-
-data11 = pd.DataFrame(
-    np.random.randn(31, 3),
-    columns=['a', 'b', 'c'])
+data2 = data2.set_index('Month')
 
 with col6:
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
@@ -169,9 +170,14 @@ with col6:
 
 
     if(selected_type == 'Daily'):
-        st.line_chart(data11)
+        lchart = px.line(data)
+        lchart.update_layout(autosize=True)
+        lchart.update_xaxes(dtick=1)
+        lchart
     else:
-        st.line_chart(data11)
+        lchart = px.line(data2)
+        lchart.update_layout(autosize=True)
+        lchart
 
 with col7:
     st.subheader("By Cluster")
