@@ -13,8 +13,8 @@ import MySQLdb
 
 st.set_page_config(layout="wide")
 
-pie_color = px.colors.sequential.deep
-# pie_color = px.colors.sequential.Burgyl
+# pie_color = px.colors.sequential.deep
+pie_color = px.colors.sequential.Burgyl
 
 st.markdown(
     """
@@ -207,19 +207,15 @@ data2 = pd.DataFrame({
 })
 data2 = data2.set_index('Month')
 
-# cluster = pd.DataFrame({
-#     "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur"],
-#     "Rev":  np.random.randint(20,190,size=6)
-# })
 cluster = pd.DataFrame({
     "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur"],
-    "Rev":  np.random.randint(100,190,size=6)
+    "Rev":  np.random.randint(20,190,size=6)
 })
 clusterChart = px.pie(cluster, values='Rev', names='Cluster', color_discrete_sequence= pie_color)
 clusterChart.update_layout(
     showlegend=False
 )
-clusterChart.update_traces(textinfo='label+percent', rotation=90)
+clusterChart.update_traces(textinfo='label+percent')
 with col6:
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
     col6a, col6b = st.columns([4,1])
@@ -276,7 +272,7 @@ outlet = outlet.set_index('Cluster')
 
 service = pd.DataFrame({
     "Service": ["Digital Banking", "Vas Content", "Music", "Video", "Games Marketplace"],
-    "Rev":  np.random.randint(100,200,size=5)
+    "Rev":  np.random.randint(10,200,size=5)
 })
 serviceChart = px.pie(service, values='Rev', names='Service', color_discrete_sequence= pie_color)
 

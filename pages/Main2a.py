@@ -3,8 +3,6 @@ import pandas as pd
 import numpy as np
 from datetime import date
 import plotly.express as px
-from PIL import Image
-import base64
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -75,7 +73,7 @@ with colb:
     selected_type = colb.date_input(
     'Daily',
     date.today(),
-    max_value=date.today(),
+    max_value=date.today(), 
     label_visibility="hidden")
 
 
@@ -132,20 +130,9 @@ with col2:
     with col2b:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> DAILY REV </div>', unsafe_allow_html=True)
     with col2c:
-        if((selected_type.day %3) == 0):
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> 14.4 Bn </div>', unsafe_allow_html=True)
-        elif((selected_type.day %2) == 0):
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> 13.1 Bn </div>', unsafe_allow_html=True)
-        else:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> 12.0 Bn </div>', unsafe_allow_html=True)
-        
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> 14.4 Bn </div>', unsafe_allow_html=True)
     with col2d:
-        if((selected_type.day %3) == 0):
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> 1.2 Bn </div>', unsafe_allow_html=True)
-        elif((selected_type.day %2) == 0):
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> 0.9 Bn </div>', unsafe_allow_html=True)
-        else:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> 0.8 Bn </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> 1.2 Bn </div>', unsafe_allow_html=True)
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 with col3:
@@ -162,12 +149,13 @@ with col3:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center;"> YoY </div>', unsafe_allow_html=True)
 
     with col3d:
-        data = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px"> -4.5% <img src="data:image/png;base64,{data}" width="20" height="20"/> </div> ', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> -4.5% </div>', unsafe_allow_html=True)
+
     with col3e:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px"> -19.4% <img src="data:image/png;base64,{data}" width="20" height="20"/> </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> -19.4% </div>', unsafe_allow_html=True)
+
     with col3f:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px"> -24.0% <img src="data:image/png;base64,{data}" width="20" height="20"/> </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center;"> -24.0% </div>', unsafe_allow_html=True)
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 
@@ -207,19 +195,17 @@ data2 = pd.DataFrame({
 })
 data2 = data2.set_index('Month')
 
-# cluster = pd.DataFrame({
-#     "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur"],
-#     "Rev":  np.random.randint(20,190,size=6)
-# })
 cluster = pd.DataFrame({
     "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur"],
-    "Rev":  np.random.randint(100,190,size=6)
+    "Rev":  np.random.randint(20,190,size=6)
 })
 clusterChart = px.pie(cluster, values='Rev', names='Cluster', color_discrete_sequence= pie_color)
 clusterChart.update_layout(
-    showlegend=False
+    showlegend=False,
+    width=330,
+    height=330
 )
-clusterChart.update_traces(textinfo='label+percent', rotation=90)
+clusterChart.update_traces(textinfo='label+percent', textposition='outside')
 with col6:
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
     col6a, col6b = st.columns([4,1])
@@ -276,16 +262,18 @@ outlet = outlet.set_index('Cluster')
 
 service = pd.DataFrame({
     "Service": ["Digital Banking", "Vas Content", "Music", "Video", "Games Marketplace"],
-    "Rev":  np.random.randint(100,200,size=5)
+    "Rev":  np.random.randint(10,200,size=5)
 })
 serviceChart = px.pie(service, values='Rev', names='Service', color_discrete_sequence= pie_color)
 
 serviceChart.update_layout(
-    showlegend=False
+    showlegend=False,
+    width=330,
+    height=330
 )
 
-serviceChart.update_traces(textinfo='label+percent', rotation=90)
-# serviceChart.update_traces(textinfo='label+percent', textposition='outside')
+# serviceChart.update_traces(textinfo='label+percent')
+serviceChart.update_traces(textinfo='label+percent', textposition='outside', rotation=90)
 
 col8, col9, col10 = st.columns([2,3,2])
 with col8:

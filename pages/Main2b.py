@@ -11,6 +11,9 @@ import MySQLdb
 
 st.set_page_config(layout="wide")
 
+# pie_color = px.colors.sequential.deep
+pie_color = px.colors.sequential.Burgyl
+
 st.markdown(
     """
 <style>
@@ -70,6 +73,7 @@ with colb:
     selected_type = colb.date_input(
     'Daily',
     date.today(), 
+    max_value=date.today(),
     label_visibility="hidden")
 
 
@@ -80,17 +84,41 @@ with col1:
     with st.container():
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: flex-start"> REVENUE TO TARGET </div>', unsafe_allow_html=True)
         col1a, col1b = st.columns([3,1])
-        with col1a:
-            bar = st.progress(90)
-        with col1b:
-            st.write("90%")
+        
+        if((selected_type.day %3) == 0):
+            with col1a:
+                bar = st.progress(90)
+            with col1b:
+                st.write("90%")
+        elif((selected_type.day %2) == 0):
+            with col1a:
+                bar = st.progress(72)
+            with col1b:
+                st.write("72%")
+        else:
+            with col1a:
+                bar = st.progress(20)
+            with col1b:
+                st.write("20%")
+
     with st.container():
         st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
         col1a, col1b = st.columns([3,1])
-        with col1a:
-            bar = st.progress(45)
-        with col1b:
-            st.write("45%")
+        if((selected_type.day %3) == 0):
+            with col1a:
+                bar = st.progress(45)
+            with col1b:
+                st.write("45%")
+        elif((selected_type.day %2) == 0):
+            with col1a:
+                bar = st.progress(93)
+            with col1b:
+                st.write("93%")
+        else:
+            with col1a:
+                bar = st.progress(78)
+            with col1b:
+                st.write("78%")
         
 
 with col2:
@@ -151,9 +179,9 @@ with col4:
 col6, col7 = st.columns([5,2])
 data = pd.DataFrame({
     "Date": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"],
-    "Rev1":  [111, 117, 109, 111, 81, 69, 82, 80, 70, 71, 102, 100, 102, 102, 99, 88, 79, 82, 84, 69, 100, 103, 91, 78, 82, 72, 82, 79, 77, 111, 99],
-    "Rev2":  [108, 110, 116, 100, 70, 81, 80, 70, 69, 80, 111, 112, 109, 105, 102, 92, 98, 83, 72, 92, 89, 89, 69, 85, 79, 73, 78, 83, 70, 110, 87],
-    "Rev3":  [114, 121, 122, 119, 95, 80, 89, 78, 80, 93, 109, 99, 106, 112, 110, 91, 101, 92, 80, 82, 99, 107, 88, 98, 80, 71, 79, 81, 76, 100, 71]
+    "Rev1":  np.random.randint(80,120,size=31),
+    "Rev2":  np.random.randint(80,120,size=31),
+    "Rev3":  np.random.randint(80,120,size=31)
 })
 data = data.set_index('Date')
 
@@ -161,17 +189,17 @@ data = data.set_index('Date')
 
 data2 = pd.DataFrame({
     "Month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"],
-    "Rev1":  [25, 45, 167, 70, 71, 46, 51, 94, 62, 56, 38, 112],
-    "Rev2":  [21, 66, 143, 83, 30, 63, 23, 79, 53, 61, 61, 142],
-    "Rev3":  [35, 73, 168, 89, 90, 99, 32, 92, 41, 42, 24, 99]
+    "Rev1":  np.random.randint(200,250,size=12),
+    "Rev2":  np.random.randint(200,250,size=12),
+    "Rev3":  np.random.randint(200,250,size=12)
 })
 data2 = data2.set_index('Month')
 
 cluster = pd.DataFrame({
     "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur"],
-    "Rev":  [300, 77, 95, 205, 179, 60]
+    "Rev":  np.random.randint(20,190,size=6)
 })
-clusterChart = px.pie(cluster, values='Rev', names='Cluster', color_discrete_sequence= px.colors.sequential.deep)
+clusterChart = px.pie(cluster, values='Rev', names='Cluster', color_discrete_sequence= pie_color)
 clusterChart.update_layout(
     showlegend=False,
     width=330,
@@ -188,7 +216,7 @@ with col6:
 
 
     if(selected_type == 'Daily'):
-        lchart = px.line(data)
+        lchart = px.line(data, line_shape="spline")
         lchart.update_layout(autosize=True, legend_title=None, legend=dict(
             orientation = "h",
             xanchor = "center",
@@ -199,7 +227,7 @@ with col6:
         lchart.update_xaxes(dtick=1)
         lchart
     else:
-        lchart = px.line(data2)
+        lchart = px.line(data2, line_shape="spline")
         lchart.update_layout(autosize=True, legend_title=None, legend=dict(
             orientation = "h",
             xanchor = "center",
@@ -216,7 +244,7 @@ with col7:
 
 top5 = pd.DataFrame({
     "Service": ["Videomax", "Google Playstore", "Ipoint", "Content", "Pulsa"],
-    "M":  [3.8, 1.13, 0.34, 3.88, 1.13],
+    "M":  ["3.8", "1.13", "0.34", "3.88", "1.13"],
     "MoM":  ["-5.53%", "-44.9%", "0.09%", "-5.53%", "-44.9%"],
     "YtD":  ["-22.6%", "-64.8%", "-55.5%", "-22.6%", "-64.8%"],
     "YoY":  ["-27.8%", "-64.8%", "-35.6%", "-27.8%", "-64.8%"]
@@ -225,18 +253,18 @@ top5 = top5.set_index('Service')
 
 
 outlet = pd.DataFrame({
-    "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur"],
-    "Outlet":  [205, 179, 110, 205, 179, 110],
-    "%":  ["0.08%", "0.10%", "0.05%", "0.08%", "0.10%", "0.05%"],
-    "Rev":  ["21.6jt", "17.2jt", "12.0jt", "21.6jt", "17.2jt", "12.0jt"],
+    "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur", "Total"],
+    "Outlet":  ["205", "179", "110", "205", "179", "110", "500"],
+    "%":  ["0.08%", "0.10%", "0.05%", "0.08%", "0.10%", "0.05%", "2%"],
+    "Rev":  ["21.6jt", "17.2jt", "12.0jt", "21.6jt", "17.2jt", "12.0jt", "54jt"],
 })
 outlet = outlet.set_index('Cluster')
 
 service = pd.DataFrame({
     "Service": ["Digital Banking", "Vas Content", "Music", "Video", "Games Marketplace"],
-    "Rev":  [350, 221, 50, 198, 99]
+    "Rev":  np.random.randint(10,200,size=5)
 })
-serviceChart = px.pie(service, values='Rev', names='Service', color_discrete_sequence= px.colors.sequential.deep)
+serviceChart = px.pie(service, values='Rev', names='Service', color_discrete_sequence= pie_color)
 
 serviceChart.update_layout(
     showlegend=False,
@@ -245,7 +273,7 @@ serviceChart.update_layout(
 )
 
 # serviceChart.update_traces(textinfo='label+percent')
-serviceChart.update_traces(textinfo='label+percent', textposition='outside')
+serviceChart.update_traces(textinfo='label+percent', textposition='outside', rotation=90)
 
 col8, col9, col10 = st.columns([2,3,2])
 with col8:

@@ -179,7 +179,7 @@ with col6:
 
 
     if(selected_type == 'Daily'):
-        lchart = px.line(data)
+        lchart = px.line(data, line_shape="spline")
         lchart.update_layout(autosize=True, legend_title=None, legend=dict(
             orientation = "h",
             xanchor = "center",
@@ -190,7 +190,7 @@ with col6:
         lchart.update_xaxes(dtick=1)
         lchart
     else:
-        lchart = px.line(data2)
+        lchart = px.line(data2, line_shape="spline")
         lchart.update_layout(autosize=True, legend_title=None, legend=dict(
             orientation = "h",
             xanchor = "center",
@@ -206,7 +206,7 @@ with col7:
 
 top5 = pd.DataFrame({
     "Service": ["Videomax", "Google Playstore", "Ipoint", "Content", "Pulsa"],
-    "M":  [3.8, 1.13, 0.34, 3.88, 1.13],
+    "M":  ["3.8", "1.13", "0.34", "3.88", "1.13"],
     "MoM":  ["-5.53%", "-44.9%", "0.09%", "-5.53%", "-44.9%"],
     "YtD":  ["-22.6%", "-64.8%", "-55.5%", "-22.6%", "-64.8%"],
     "YoY":  ["-27.8%", "-64.8%", "-35.6%", "-27.8%", "-64.8%"]
@@ -215,10 +215,10 @@ top5 = top5.set_index('Service')
 
 
 outlet = pd.DataFrame({
-    "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur"],
-    "M":  [205, 179, 110, 205, 179, 110],
-    "MoM":  ["0.08%", "0.10%", "0.05%", "0.08%", "0.10%", "0.05%"],
-    "YtD":  ["21.6jt", "17.2jt", "12.0jt", "21.6jt", "17.2jt", "12.0jt"],
+    "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur", "Total"],
+    "Outlet":  ["205", "179", "110", "205", "179", "110", "500"],
+    "%":  ["0.08%", "0.10%", "0.05%", "0.08%", "0.10%", "0.05%", "2%"],
+    "Rev":  ["21.6jt", "17.2jt", "12.0jt", "21.6jt", "17.2jt", "12.0jt", "54jt"],
 })
 outlet = outlet.set_index('Cluster')
 
