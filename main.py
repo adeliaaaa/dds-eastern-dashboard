@@ -13,8 +13,8 @@ import MySQLdb
 
 st.set_page_config(layout="wide")
 
-pie_color = px.colors.sequential.deep
-# pie_color = px.colors.sequential.Burgyl
+# pie_color = px.colors.sequential.deep
+pie_color = px.colors.sequential.Burgyl
 
 st.markdown(
     """
@@ -191,16 +191,16 @@ with col4:
 col6, col7 = st.columns([5,2])
 data = pd.DataFrame({
     "Date": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"],
-    "Rev1":  [111, 117, 109, 111, 81, 85, 82, 80, 70, 71, 102, 100, 102, 102, 99, 88, 79, 82, 84, 92, 100, 103, 91, 78, 82, 72, 82, 79, 99, 111, 99],
-    "Rev2":  [108, 110, 116, 100, 91, 81, 80, 72, 69, 80, 101, 112, 109, 105, 102, 92, 94, 83, 80, 85, 102, 113, 109, 85, 79, 73, 79, 88, 102, 110, 87],
-    "Rev3":  [114, 121, 122, 119, 95, 80, 89, 78, 80, 93, 109, 99, 95, 89, 102, 90, 87, 86, 81, 82, 99, 107, 88, 98, 80, 71, 79, 81, 100, 100, 71]
+    "Actual":  [111, 117, 109, 111, 81, 85, 82, 80, 70, 71, 102, 100, 102, 102, 99, 88, 79, 82, 84, 92, 100, 103, 91, 78, 82, 72, 82, 79, 99, 111, 99],
+    "MoM":  [108, 110, 116, 100, 91, 81, 80, 72, 69, 80, 101, 112, 109, 105, 102, 92, 94, 83, 80, 85, 102, 113, 109, 85, 79, 73, 79, 88, 102, 110, 87],
+    "YoY":  [114, 121, 122, 119, 95, 80, 89, 78, 80, 93, 109, 99, 95, 89, 102, 90, 87, 86, 81, 82, 99, 107, 88, 98, 80, 71, 79, 81, 100, 100, 71]
 })
 data = data.set_index('Date')
 data2 = pd.DataFrame({
     "Month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"],
-    "Rev1":  [25, 45, 167, 70, 71, 46, 51, 94, 62, 56, 38, 112],
-    "Rev2":  [21, 66, 143, 83, 30, 63, 23, 79, 53, 61, 61, 142],
-    "Rev3":  [35, 73, 168, 89, 90, 65, 32, 92, 41, 42, 24, 99]
+    "Actual":  [25, 45, 167, 70, 71, 46, 51, 94, 62, 56, 38, 112],
+    "MoM":  [21, 66, 143, 83, 30, 63, 23, 79, 53, 61, 61, 142],
+    "YoY":  [35, 73, 168, 89, 90, 65, 32, 92, 41, 42, 24, 99]
 })
 data2 = data2.set_index('Month')
 
@@ -216,7 +216,7 @@ clusterChart = px.pie(cluster, values='Rev', names='Cluster', color_discrete_seq
 clusterChart.update_layout(
     showlegend=False
 )
-clusterChart.update_traces(textinfo='label+percent', rotation=90)
+clusterChart.update_traces(textinfo='label+percent+value', rotation=90)
 with col6:
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
     col6a, col6b = st.columns([4,1])
@@ -281,7 +281,7 @@ serviceChart.update_layout(
     showlegend=False
 )
 
-serviceChart.update_traces(textinfo='label+percent', rotation=90)
+serviceChart.update_traces(textinfo='label+percent+value', rotation=90)
 # serviceChart.update_traces(textinfo='label+percent', textposition='outside')
 
 col8, col9, col10 = st.columns([2,3,2])
