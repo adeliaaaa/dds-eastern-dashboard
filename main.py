@@ -20,10 +20,19 @@ pie_color = px.colors.sequential.Burgyl
 st.markdown(
     """
 <style>
-    [data-testid="column"]:has(div.PortMaker) {
+    
+    .css-fg4pbf [data-testid="column"]:has(div.PortMaker) {
         display: flex;
         align-items: center;
         box-shadow: rgb(0 0 0 / 20%) 0px 2px 1px -1px, rgb(0 0 0 / 14%) 0px 1px 1px 0px, rgb(0 0 0 / 12%) 0px 1px 3px 0px;
+        border-radius: 15px;
+        padding: 0.5% 0.7% 0.5% 0.7%;
+    }
+
+    .css-ffhzg2 [data-testid="column"]:has(div.PortMaker) {
+        display: flex;
+        align-items: center;
+        box-shadow: rgb(255 255 255 / 20%) 0px 2px 1px -1px, rgb(255 255 255 / 14%) 0px 1px 1px 0px, rgb(255 255 255 / 12%) 0px 1px 3px 0px;
         border-radius: 15px;
         padding: 0.5% 0.7% 0.5% 0.7%;
     }
@@ -159,7 +168,7 @@ outlet = outlet.set_index('Cluster')
 
 cola, colb = st.columns([6,1])
 with cola:
-    st.title('DDS EASTERN')
+    st.title(':red[DDS REGIONAL] EASTERN')
 with colb:
     selected_type = colb.date_input(
     'Daily',
