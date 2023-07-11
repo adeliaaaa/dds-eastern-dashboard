@@ -81,12 +81,11 @@ st.markdown("""---""")
 
 
 data = data.set_index('cluster')
-data['digital'] = data['digital'].astype(float) / 1000000000
-data['digital'] = data["digital"].map('{:.2f}'.format)
-data['Games'] = data['Games'].astype(float) / 1000000000
-data['Games'] = data["Games"].map('{:.2f}'.format)
-data['Video'] = data['Video'].astype(float) / 1000000000
-data['Video'] = data["Video"].map('{:.2f}'.format)
+data['digital'] = (data['digital'].astype(float) / 1000000000).map('{:.2f}'.format)
+
+data['Games'] = (data['Games'].astype(float) / 1000000000).map('{:.2f}'.format)
+
+data['Video'] = (data['Video'].astype(float) / 1000000000).map('{:.2f}'.format)
 
 st.write(data)
 raw_data.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date']

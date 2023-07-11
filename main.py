@@ -2,9 +2,12 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import date
+import datetime
 import plotly.express as px
 from PIL import Image
 import base64
+
+from numerize import numerize
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -78,6 +81,43 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# ----------------------------------------------------------- DATA -----------------------------------------------------------
+@st.cache_data
+def load_data():
+    connection = MySQLdb.connect(
+        host= 'localhost',
+        user='root',
+        passwd= '',
+        db= 'ddseastern',
+        autocommit = True
+    )
+
+    db_cursor = connection.cursor()
+    # db_cursor.execute('SET workload = OLAP')
+    db_cursor.execute('SELECT rev_date, cluster, rev_sum, month, date FROM digital_2022 WHERE reg = "EASTERN JABOTABEK"')
+    table_rows = db_cursor.fetchall()
+    raw_data22 = pd.DataFrame(table_rows)
+
+    db_cursor.execute('SELECT rev_date, cluster, rev_sum, month, date FROM digital_2023 WHERE reg = "EASTERN JABOTABEK"')
+    table_rows = db_cursor.fetchall()
+    raw_data23 = pd.DataFrame(table_rows)
+
+
+    db_cursor.execute('select rev_date from digital_2023 order by rev_date desc limit 1')
+    table_rows = db_cursor.fetchall()
+    max_date_data = pd.DataFrame(table_rows)
+
+    max_date_data = datetime.datetime.strptime(max_date_data[0][0], "%d/%m/%Y")
+
+    return max_date_data, raw_data22, raw_data23
+
+max_date_data, raw_data22, raw_data23 = load_data()
+raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date']
+raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date']
+raw_data23['Month'] = raw_data23['Month'].astype('int')
+raw_data22['Month'] = raw_data22['Month'].astype('int')
+raw_data23['Date'] = raw_data23['Date'].astype('int')
+raw_data22['Date'] = raw_data22['Date'].astype('int')
 # -------------------------------------------------------- LINE CHART --------------------------------------------------------
 data = pd.DataFrame({
     "Date": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"],
@@ -172,8 +212,8 @@ with cola:
 with colb:
     selected_type = colb.date_input(
     'Daily',
-    date.today(),
-    max_value=date.today(),
+    max_date_data,
+    max_value=max_date_data,
     label_visibility="hidden")
 
 
@@ -224,26 +264,19 @@ with col1:
 with col2:
     col2a, col2b = st.columns(2)
     col2c, col2d = st.columns(2)
+    total_rev = numerize.numerize(raw_data23['Rev_sum'].sum())
+    total_rev = numerize.numerize(raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum())
+    daily_rev = numerize.numerize(raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum() / selected_type.day)
 
     with col2a:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> TOTAL REV </div>', unsafe_allow_html=True)
     with col2b:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> DAILY REV </div>', unsafe_allow_html=True)
     with col2c:
-        if((selected_type.day %3) == 0):
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> 14.4 Bn </div>', unsafe_allow_html=True)
-        elif((selected_type.day %2) == 0):
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> 13.1 Bn </div>', unsafe_allow_html=True)
-        else:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> 12.0 Bn </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {total_rev} </div>', unsafe_allow_html=True)
         
     with col2d:
-        if((selected_type.day %3) == 0):
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> 1.2 Bn </div>', unsafe_allow_html=True)
-        elif((selected_type.day %2) == 0):
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> 0.9 Bn </div>', unsafe_allow_html=True)
-        else:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> 0.8 Bn </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {daily_rev} </div>', unsafe_allow_html=True)
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 
@@ -355,3 +388,17 @@ with col10:
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
     st.dataframe(outlet, use_container_width=True)
 
+
+if st.checkbox('Show raw data'):
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader('Raw data22')
+        st.write(raw_data22)
+    with col2:
+        st.subheader('Raw data23')
+        st.write(raw_data23)
+    # groupped_by = raw_data22.groupby('Cluster')
+
+    # st.write(groupped_by.first())
+    # st.subheader('Data Bogor')
+    # st.write(groupped_by.get_group('BOGOR'))
