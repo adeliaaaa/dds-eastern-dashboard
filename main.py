@@ -223,16 +223,29 @@ with colb:
     max_value=max_date_data,
     label_visibility="hidden")
 
-total_rev_number = raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+total_rev_number_M = raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
 total_rev_number_M_1 = raw_data23.loc[(raw_data23['Month'] == (selected_type.month - 1)) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
-total_rev = numerize.numerize(raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum())
-daily_rev = numerize.numerize(raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum() / selected_type.day)
-rev_to_target_number = float(total_rev_number) / target_revenue_eastern * 100
-rev_to_target = numerize.numerize(float(total_rev_number) / target_revenue_eastern * 100)
-rev_to_target_gap = numerize.numerize(target_revenue_eastern - float(total_rev_number))
+total_rev_M = numerize.numerize(raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum())
+daily_rev = numerize.numerize(total_rev_number_M / selected_type.day)
 
-MoM = numerize.numerize(((total_rev_number / total_rev_number_M_1) - 1) * 100)
-MoM_gap = numerize.numerize(total_rev_number - total_rev_number_M_1)
+rev_to_target_number = float(total_rev_number_M) / target_revenue_eastern * 100
+rev_to_target = numerize.numerize(float(total_rev_number_M) / target_revenue_eastern * 100)
+rev_to_target_gap = numerize.numerize(target_revenue_eastern - float(total_rev_number_M))
+
+MoM = numerize.numerize(((total_rev_number_M / total_rev_number_M_1) - 1) * 100)
+MoM_gap = numerize.numerize(total_rev_number_M - total_rev_number_M_1)
+
+total_rev_2022 = raw_data22.loc[(raw_data22['Month'] <= selected_type.month) & (raw_data22['Date'] <= selected_type.day), 'Rev_sum'].sum()
+total_rev_2023 = raw_data23.loc[(raw_data23['Month'] <= selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+YtD = numerize.numerize(((total_rev_2023 / total_rev_2022) - 1) * 100)
+YtD_gap = numerize.numerize(total_rev_2023 - total_rev_2022)
+
+total_rev__number_M_22 = raw_data22.loc[(raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day), 'Rev_sum'].sum()
+YoY = numerize.numerize(((total_rev_number_M / total_rev__number_M_22) - 1) * 100)
+YoY_gap = numerize.numerize(total_rev_number_M - total_rev__number_M_22)
+
+image_down = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
+image_up = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8')
 
 
 col1, col2, col3, col4 = st.columns([2,2,3,2])
@@ -278,7 +291,7 @@ with col2:
     with col2b:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> DAILY REV </div>', unsafe_allow_html=True)
     with col2c:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {total_rev} </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {total_rev_M} </div>', unsafe_allow_html=True)
         
     with col2d:
         st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {daily_rev} </div>', unsafe_allow_html=True)
@@ -301,12 +314,20 @@ with col3:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> YoY </div>', unsafe_allow_html=True)
 
     with col3d:
-        image = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM}% <img src="data:image/png;base64,{image}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+        if(MoM_gap[0] == '-'):
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+        else:
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
     with col3e:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> -19.4% <img src="data:image/png;base64,{image}" width="21" height="21"/> </div>', unsafe_allow_html=True)
+        if(YtD_gap[0] == '-'):
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div>', unsafe_allow_html=True)
+        else:
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div>', unsafe_allow_html=True)
     with col3f:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> -24.0% <img src="data:image/png;base64,{image}" width="21" height="21"/> </div>', unsafe_allow_html=True)
+        if(YoY_gap[0] == '-'):
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div>', unsafe_allow_html=True)
+        else:
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div>', unsafe_allow_html=True)
     with col3g:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div> ', unsafe_allow_html=True)
     with col3h:
@@ -316,9 +337,9 @@ with col3:
     with col3j:
         st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM_gap} </div> ', unsafe_allow_html=True)
     with col3k:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> 2.5Mn </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD_gap} </div>', unsafe_allow_html=True)
     with col3l:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> 0.8Mn </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY_gap} </div>', unsafe_allow_html=True)
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 
