@@ -81,7 +81,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ----------------------------------------------------------- DATA -----------------------------------------------------------
+# --------------------------------------------------------- DATABASE ---------------------------------------------------------
 @st.cache_data
 def load_data():
     connection = MySQLdb.connect(
@@ -111,6 +111,8 @@ def load_data():
 
     return max_date_data, raw_data22, raw_data23
 
+
+# ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
 max_date_data, raw_data22, raw_data23 = load_data()
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date']
@@ -118,6 +120,11 @@ raw_data23['Month'] = raw_data23['Month'].astype('int')
 raw_data22['Month'] = raw_data22['Month'].astype('int')
 raw_data23['Date'] = raw_data23['Date'].astype('int')
 raw_data22['Date'] = raw_data22['Date'].astype('int')
+
+target_revenue_eastern = 46671504423.89
+
+
+
 # -------------------------------------------------------- LINE CHART --------------------------------------------------------
 data = pd.DataFrame({
     "Date": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"],
@@ -216,34 +223,34 @@ with colb:
     max_value=max_date_data,
     label_visibility="hidden")
 
+total_rev_number = raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+total_rev_number_M_1 = raw_data23.loc[(raw_data23['Month'] == (selected_type.month - 1)) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+total_rev = numerize.numerize(raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum())
+daily_rev = numerize.numerize(raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum() / selected_type.day)
+rev_to_target_number = float(total_rev_number) / target_revenue_eastern * 100
+rev_to_target = numerize.numerize(float(total_rev_number) / target_revenue_eastern * 100)
+rev_to_target_gap = numerize.numerize(target_revenue_eastern - float(total_rev_number))
+
+MoM = numerize.numerize(((total_rev_number / total_rev_number_M_1) - 1) * 100)
+MoM_gap = numerize.numerize(total_rev_number - total_rev_number_M_1)
+
 
 col1, col2, col3, col4 = st.columns([2,2,3,2])
 with col1:
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
     with st.container():
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE TO TARGET </div>', unsafe_allow_html=True)
-        col1a, col1b = st.columns([4,2])
+        col1a, col1b = st.columns([4,3])
         gap = "1.16Mn"
         
-        if((selected_type.day %3) == 0):
-            with col1a:
-                bar = st.progress(90)
-            with col1b:
-                st.write(f"90%, -{gap}")
-        elif((selected_type.day %2) == 0):
-            with col1a:
-                bar = st.progress(72)
-            with col1b:
-                st.write(f"72%, -{gap}")
-        else:
-            with col1a:
-                bar = st.progress(20)
-            with col1b:
-                st.write(f"20%, -{gap}")
+        with col1a:
+            bar = st.progress(int(rev_to_target_number))
+        with col1b:
+            st.write(f"{rev_to_target}%, -{rev_to_target_gap}")
 
     with st.container():
         st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
-        col1a, col1b = st.columns([4,2])
+        col1a, col1b = st.columns([4,3])
         if((selected_type.day %3) == 0):
             with col1a:
                 bar = st.progress(45)
@@ -264,9 +271,7 @@ with col1:
 with col2:
     col2a, col2b = st.columns(2)
     col2c, col2d = st.columns(2)
-    total_rev = numerize.numerize(raw_data23['Rev_sum'].sum())
-    total_rev = numerize.numerize(raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum())
-    daily_rev = numerize.numerize(raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum() / selected_type.day)
+
 
     with col2a:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> TOTAL REV </div>', unsafe_allow_html=True)
@@ -297,7 +302,7 @@ with col3:
 
     with col3d:
         image = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> -4.5% <img src="data:image/png;base64,{image}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM}% <img src="data:image/png;base64,{image}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
     with col3e:
         st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> -19.4% <img src="data:image/png;base64,{image}" width="21" height="21"/> </div>', unsafe_allow_html=True)
     with col3f:
@@ -309,7 +314,7 @@ with col3:
     with col3i:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
     with col3j:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> 1.2Mn </div> ', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM_gap} </div> ', unsafe_allow_html=True)
     with col3k:
         st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> 2.5Mn </div>', unsafe_allow_html=True)
     with col3l:
