@@ -103,17 +103,21 @@ def load_data():
     raw_data23 = pd.DataFrame(table_rows)
 
 
-    db_cursor.execute('select rev_date from digital_2023 order by rev_date desc limit 1')
+    db_cursor.execute('select rev_date from digital_2023 order by month desc, date desc limit 1')
     table_rows = db_cursor.fetchall()
     max_date_data = pd.DataFrame(table_rows)
 
+    db_cursor.execute('select sum(rev_sum) from digital_2023 where reg = "EASTERN JABOTABEK" and month = 7 and date <=9')
+    table_rows = db_cursor.fetchall()
+    total_rev = pd.DataFrame(table_rows)
+
     max_date_data = datetime.datetime.strptime(max_date_data[0][0], "%d/%m/%Y")
 
-    return max_date_data, raw_data22, raw_data23
+    return max_date_data, raw_data22, raw_data23, total_rev
 
 
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
-max_date_data, raw_data22, raw_data23 = load_data()
+max_date_data, raw_data22, raw_data23, total_rrrr = load_data()
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date']
 raw_data23['Month'] = raw_data23['Month'].astype('int')
@@ -224,8 +228,10 @@ with colb:
     label_visibility="hidden")
 
 total_rev_number_M = raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+st.write("m", total_rev_number_M)
 total_rev_number_M_1 = raw_data23.loc[(raw_data23['Month'] == (selected_type.month - 1)) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
-total_rev_M = numerize.numerize(raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum())
+st.write("m-1", total_rev_number_M_1)
+total_rev_M = numerize.numerize(float(raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()))
 daily_rev = numerize.numerize(total_rev_number_M / selected_type.day)
 
 rev_to_target_number = float(total_rev_number_M) / target_revenue_eastern * 100
@@ -233,10 +239,17 @@ rev_to_target = numerize.numerize(float(total_rev_number_M) / target_revenue_eas
 rev_to_target_gap = numerize.numerize(target_revenue_eastern - float(total_rev_number_M))
 
 MoM = numerize.numerize(((total_rev_number_M / total_rev_number_M_1) - 1) * 100)
-MoM_gap = numerize.numerize(total_rev_number_M - total_rev_number_M_1)
+MoM_gap = numerize.numerize(float(total_rev_number_M - total_rev_number_M_1))
 
-total_rev_2022 = raw_data22.loc[(raw_data22['Month'] <= selected_type.month) & (raw_data22['Date'] <= selected_type.day), 'Rev_sum'].sum()
-total_rev_2023 = raw_data23.loc[(raw_data23['Month'] <= selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+y_1_date = datetime.datetime(2022, selected_type.month, selected_type.day)
+total_rev_2022 = raw_data22.loc[(raw_data22['Rev_Date'] <= y_1_date.strftime("%d/%m/%Y")), 'Rev_sum'].sum()
+total_rev_2023 = raw_data23.loc[(raw_data23['Rev_Date'] <= selected_type.strftime("%d/%m/%Y")), 'Rev_sum'].sum()
+st.write("total rev 22", total_rev_2022)
+st.write("total rev 23", total_rev_2023)
+st.write("selected_type", selected_type)
+st.write("today", selected_type.strftime("%d/%m/%Y"))
+st.write("last year", y_1_date.strftime("%d/%m/%Y"))
+
 YtD = numerize.numerize(((total_rev_2023 / total_rev_2022) - 1) * 100)
 YtD_gap = numerize.numerize(total_rev_2023 - total_rev_2022)
 
