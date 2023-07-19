@@ -7,6 +7,8 @@ import plotly.express as px
 from PIL import Image
 import base64
 
+import calendar
+
 from numerize import numerize
 
 from dotenv import load_dotenv
@@ -141,8 +143,8 @@ data = data.set_index('Date')
 data2 = pd.DataFrame({
     "Month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"],
     "Actual":  [25, 45, 167, 70, 71, 46, 51, 94, 62, 56, 38, 112],
-    "MoM":  [21, 66, 143, 83, 30, 63, 23, 79, 53, 61, 61, 142],
-    "YoY":  [35, 73, 168, 89, 90, 65, 32, 92, 41, 42, 24, 99]
+    "M-1":  [21, 66, 143, 83, 30, 63, 23, 79, 53, 61, 61, 142],
+    "Y-1":  [35, 73, 168, 89, 90, 65, 32, 92, 41, 42, 24, 99]
 })
 data2 = data2.set_index('Month')
 
@@ -217,6 +219,8 @@ outlet = outlet.set_index('Cluster')
 # top5=top5.style.set_properties(**{'text-align': 'left'}).set_table_styles(styles)
 
 
+
+
 cola, colb = st.columns([6,1])
 with cola:
     st.title(':red[DDS REGIONAL] EASTERN')
@@ -228,9 +232,8 @@ with colb:
     label_visibility="hidden")
 
 total_rev_number_M = raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
-st.write("m", total_rev_number_M)
 total_rev_number_M_1 = raw_data23.loc[(raw_data23['Month'] == (selected_type.month - 1)) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
-st.write("m-1", total_rev_number_M_1)
+
 total_rev_M = numerize.numerize(float(raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()))
 daily_rev = numerize.numerize(total_rev_number_M / selected_type.day)
 
@@ -242,23 +245,30 @@ MoM = numerize.numerize(((total_rev_number_M / total_rev_number_M_1) - 1) * 100)
 MoM_gap = numerize.numerize(float(total_rev_number_M - total_rev_number_M_1))
 
 y_1_date = datetime.datetime(2022, selected_type.month, selected_type.day)
-total_rev_2022 = raw_data22.loc[(raw_data22['Rev_Date'] <= y_1_date.strftime("%d/%m/%Y")), 'Rev_sum'].sum()
-total_rev_2023 = raw_data23.loc[(raw_data23['Rev_Date'] <= selected_type.strftime("%d/%m/%Y")), 'Rev_sum'].sum()
-st.write("total rev 22", total_rev_2022)
-st.write("total rev 23", total_rev_2023)
-st.write("selected_type", selected_type)
-st.write("today", selected_type.strftime("%d/%m/%Y"))
-st.write("last year", y_1_date.strftime("%d/%m/%Y"))
+total_rev_2022 = raw_data22.loc[(raw_data22['Month'] <= selected_type.month -1) | ((raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day)), 'Rev_sum'].sum()
+total_rev_2023 = raw_data23.loc[(raw_data23['Month'] <= selected_type.month -1) | ((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day)), 'Rev_sum'].sum()
 
 YtD = numerize.numerize(((total_rev_2023 / total_rev_2022) - 1) * 100)
-YtD_gap = numerize.numerize(total_rev_2023 - total_rev_2022)
+YtD_gap = numerize.numerize(float(total_rev_2023 - total_rev_2022))
 
 total_rev__number_M_22 = raw_data22.loc[(raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day), 'Rev_sum'].sum()
 YoY = numerize.numerize(((total_rev_number_M / total_rev__number_M_22) - 1) * 100)
-YoY_gap = numerize.numerize(total_rev_number_M - total_rev__number_M_22)
+YoY_gap = numerize.numerize(float(total_rev_number_M - total_rev__number_M_22))
 
 image_down = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
 image_up = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8')
+
+trend_monthly_rev = (raw_data23.groupby(['Month'])['Rev_sum'].sum()).to_frame().reset_index()
+trend_monthly_rev.columns = ['Month', 'Actual']
+trend_monthly_rev_YoY_data = raw_data22.loc[(raw_data22['Month'] <= selected_type.month -1) | ((raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day))]
+trend_monthly_rev_YoY = (trend_monthly_rev_YoY_data.groupby(['Month'])['Rev_sum'].sum()).to_frame().reset_index()
+trend_monthly_rev_YoY.columns = ['Month', 'Y-1']
+trend_monthly = pd.merge(trend_monthly_rev, trend_monthly_rev_YoY, on='Month')
+trend_monthly = trend_monthly.set_index('Month')
+trend_monthly.index = trend_monthly.index.astype(str)
+# trend_monthly.index
+trend_monthly.rename(index={'1':'Jan', '2':'Feb', '3':'Mar', '4': 'Apr', '5': 'May', '6': 'Jun', '7': 'Jul'}, inplace=True)
+# trend_monthly.index
 
 
 col1, col2, col3, col4 = st.columns([2,2,3,2])
@@ -277,21 +287,8 @@ with col1:
     with st.container():
         st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
         col1a, col1b = st.columns([4,3])
-        if((selected_type.day %3) == 0):
-            with col1a:
-                bar = st.progress(45)
-            with col1b:
-                st.write("45%")
-        elif((selected_type.day %2) == 0):
-            with col1a:
-                bar = st.progress(93)
-            with col1b:
-                st.write("93%")
-        else:
-            with col1a:
-                bar = st.progress(78)
-            with col1b:
-                st.write("78%")
+        bar = st.progress(45)
+        st.write("45%")
         
 
 with col2:
@@ -380,12 +377,11 @@ with col6:
     selected_type = col6b.selectbox(
     'Daily',
     ('Daily', 'Monthly'), label_visibility="hidden")
-    # with col6a:
-    #     st.write(f'<div style="font-weight: 600; display: flex; justify-content: flex-start; font-size:2vw;"> Trend {selected_type} Revenue </div>', unsafe_allow_html=True)
+
     col6a.subheader(f"Trend {selected_type} Revenue")
 
     if(selected_type == 'Daily'):
-        lchart = px.line(data, line_shape="spline")
+        lchart = px.line(data, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly)
         lchart.update_layout(autosize=True, legend_title=None, legend=dict(
             orientation = "h",
             xanchor = "center",
@@ -396,7 +392,7 @@ with col6:
         lchart.update_xaxes(dtick=1)
         lchart
     else:
-        lchart = px.line(data2, line_shape="spline")
+        lchart = px.line(trend_monthly, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly)
         lchart.update_layout(autosize=True, legend_title=None, legend=dict(
             orientation = "h",
             xanchor = "center",
@@ -441,3 +437,12 @@ if st.checkbox('Show raw data'):
     # st.write(groupped_by.first())
     # st.subheader('Data Bogor')
     # st.write(groupped_by.get_group('BOGOR'))
+
+def debug():
+    st.write("m", total_rev_number_M)
+    st.write("m-1", total_rev_number_M_1)
+    st.write("total rev 22", total_rev_2022)
+    st.write("total rev 23", total_rev_2023)
+    st.write("selected_type", selected_type)
+    st.write("today", selected_type.strftime("%d/%m/%Y"))
+    st.write("last year", y_1_date.strftime("%d/%m/%Y"))
