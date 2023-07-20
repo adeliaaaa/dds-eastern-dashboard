@@ -110,27 +110,27 @@ def load_data():
     table_rows = db_cursor.fetchall()
     max_date_data = pd.DataFrame(table_rows)
 
-    db_cursor.execute('select sum(rev_sum) from digital_2023 where reg = "EASTERN JABOTABEK" and month = 7 and date <=9')
+    db_cursor.execute('SELECT bulan, subs FROM rgb_all WHERE reg="EASTERN JABOTABEK"')
     table_rows = db_cursor.fetchall()
-    total_rev = pd.DataFrame(table_rows)
+    rgb_all = pd.DataFrame(table_rows)
+
 
     max_date_data = datetime.datetime.strptime(max_date_data[0][0], "%d/%m/%Y")
 
-    return max_date_data, raw_data22, raw_data23, total_rev
+    return max_date_data, raw_data22, raw_data23, rgb_all
 
 
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
-max_date_data, raw_data22, raw_data23, total_rrrr = load_data()
+max_date_data, raw_data22, raw_data23, raw_rgb_all = load_data()
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
+raw_rgb_all.columns = ['Date', 'Subs']
 raw_data23['Month'] = raw_data23['Month'].astype('int')
 raw_data22['Month'] = raw_data22['Month'].astype('int')
 raw_data23['Date'] = raw_data23['Date'].astype('int')
 raw_data22['Date'] = raw_data22['Date'].astype('int')
 
 target_revenue_eastern = 46671504423.89
-
-
 
 
 # -------------------------------------------------------- TABLE TOP 5 -------------------------------------------------------
@@ -271,6 +271,13 @@ clusterChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percen
 
 # ---------------------------------------------------------- DESIGN ----------------------------------------------------------
 
+last_month_date = datetime.datetime(selected_type.year, selected_type.month-1, selected_type.day)
+today_date = selected_type.strftime("%d/%m/%Y")
+last_month = last_month_date.strftime("%d/%m/%Y")
+rgb_all_M = numerize.numerize(float(raw_rgb_all.loc[(raw_rgb_all['Date'] == today_date), 'Subs'].sum()))
+
+# ---------------------------------------------------------- DESIGN ----------------------------------------------------------
+
 col1, col2, col3, col4 = st.columns([2,2,3,2])
 with col1:
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
@@ -366,7 +373,7 @@ with col4:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> MoM </div>', unsafe_allow_html=True)
         
     with col4c:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> 1.2Mn </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {rgb_all_M} </div>', unsafe_allow_html=True)
         
     with col4d:
         st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> -0.61% </div>', unsafe_allow_html=True)
