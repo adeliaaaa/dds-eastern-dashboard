@@ -130,21 +130,6 @@ raw_data22['Date'] = raw_data22['Date'].astype('int')
 
 target_revenue_eastern = 46671504423.89
 
-
-# ---------------------------------------------------- PIE CHART SERVICE -----------------------------------------------------
-service = pd.DataFrame({
-    "Service": ["Digital Banking", "Vas Content", "Music", "Video", "Games Marketplace"],
-    "Rev":  np.random.randint(40,200,size=5)
-})
-serviceChart = px.pie(service, values='Rev', names='Service', color_discrete_sequence= pie_color)
-
-serviceChart.update_layout(
-    showlegend=False
-)
-
-serviceChart.update_traces(textinfo='label+percent+value', rotation=45, textfont_size=14)
-# serviceChart.update_traces(textinfo='label+percent', textposition='outside')
-
 # ----------------------------------------------------- PIE CHART CLUSTER ----------------------------------------------------
 cluster = pd.DataFrame({
     "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur"],
@@ -249,7 +234,7 @@ trend_monthly_rev_YoY.columns = ['Month', 'Y-1']
 trend_monthly = pd.merge(trend_monthly_rev, trend_monthly_rev_YoY, on='Month')
 trend_monthly = trend_monthly.set_index('Month')
 trend_monthly.index = trend_monthly.index.astype(str)
-trend_monthly.rename(index={'1':'Jan', '2':'Feb', '3':'Mar', '4': 'Apr', '5': 'May', '6': 'Jun', '7': 'Jul'}, inplace=True)
+trend_monthly.rename(index={'1':'Jan', '2':'Feb', '3':'Mar', '4': 'Apr', '5': 'May', '6': 'Jun', '7': 'Jul', '8': 'Aug', '9': 'Sept', '10': 'Oct', '11': 'Nov', '12': 'Des'}, inplace=True)
 
 current_month_data = raw_data23.loc[((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day))]
 Y_1_month_data = raw_data22.loc[((raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day))]
@@ -264,9 +249,23 @@ trend_daily_rev = trend_daily_rev.set_index('Date')
 trend_daily_rev_M_1 = trend_daily_rev_M_1.set_index('Date')
 trend_daily_rev_Y_1 = trend_daily_rev_Y_1.set_index('Date')
 
+# ---------------------------------------------------- PIE CHART SERVICE -----------------------------------------------------
+rev_service = (current_month_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index()
+rev_service = rev_service.set_index('Service')
+
+rev_service = rev_service[(rev_service.index == 'Digital Banking') | (rev_service.index == 'Digital Music')| (rev_service.index == 'Games Marketplace') | (rev_service.index == 'VAS Content') | (rev_service.index == 'Video')]
+rev_service['Rev_sum'] = rev_service['Rev_sum'].apply(lambda x: "{:.2f}".format(x/1000000000))
+
+serviceChart = px.pie(rev_service, values='Rev_sum', names=rev_service.index, color_discrete_sequence= pie_color)
+
+serviceChart.update_layout(
+    showlegend=False
+)
+
+serviceChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percent})", rotation=15, textfont_size=14)
 
 
-
+# ---------------------------------------------------------- DESIGN ----------------------------------------------------------
 
 col1, col2, col3, col4 = st.columns([2,2,3,2])
 with col1:
@@ -388,8 +387,8 @@ with col6:
             y = -0.2,
             entrywidth=40
         ))
-        lchart.add_traces(go.Scatter(x=trend_daily_rev_M_1.index, y=trend_daily_rev_M_1['Rev_sum'], name='M-1', line_shape="spline"))
-        lchart.add_traces(go.Scatter(x=trend_daily_rev_Y_1.index, y=trend_daily_rev_Y_1['Rev_sum'], name='Y-1', line_shape="spline"))
+        lchart.add_traces(go.Scatter(x=trend_daily_rev_M_1.index, y=trend_daily_rev_M_1['Rev_sum'], name='M-1', line_shape="spline", mode='markers+lines'))
+        lchart.add_traces(go.Scatter(x=trend_daily_rev_Y_1.index, y=trend_daily_rev_Y_1['Rev_sum'], name='Y-1', line_shape="spline", mode='markers+lines'))
         lchart.update_xaxes(dtick=1)
         lchart
     else:
