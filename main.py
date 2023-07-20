@@ -8,6 +8,7 @@ from PIL import Image
 import base64
 
 import calendar
+import plotly.graph_objects as go
 
 from numerize import numerize
 
@@ -96,11 +97,11 @@ def load_data():
 
     db_cursor = connection.cursor()
     # db_cursor.execute('SET workload = OLAP')
-    db_cursor.execute('SELECT rev_date, cluster, rev_sum, month, date FROM digital_2022 WHERE reg = "EASTERN JABOTABEK"')
+    db_cursor.execute('SELECT rev_date, cluster, rev_sum, month, date, divisi FROM digital_2022 WHERE reg = "EASTERN JABOTABEK"')
     table_rows = db_cursor.fetchall()
     raw_data22 = pd.DataFrame(table_rows)
 
-    db_cursor.execute('SELECT rev_date, cluster, rev_sum, month, date FROM digital_2023 WHERE reg = "EASTERN JABOTABEK"')
+    db_cursor.execute('SELECT rev_date, cluster, rev_sum, month, date, divisi FROM digital_2023 WHERE reg = "EASTERN JABOTABEK"')
     table_rows = db_cursor.fetchall()
     raw_data23 = pd.DataFrame(table_rows)
 
@@ -120,33 +121,14 @@ def load_data():
 
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
 max_date_data, raw_data22, raw_data23, total_rrrr = load_data()
-raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date']
-raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date']
+raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
+raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23['Month'] = raw_data23['Month'].astype('int')
 raw_data22['Month'] = raw_data22['Month'].astype('int')
 raw_data23['Date'] = raw_data23['Date'].astype('int')
 raw_data22['Date'] = raw_data22['Date'].astype('int')
 
 target_revenue_eastern = 46671504423.89
-
-
-
-# -------------------------------------------------------- LINE CHART --------------------------------------------------------
-data = pd.DataFrame({
-    "Date": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"],
-    "Actual":  [111, 117, 109, 111, 81, 85, 82, 80, 70, 71, 102, 100, 102, 102, 99, 88, 79, 82, 84, 92, 100, 103, 91, 78, 82, 72, 82, 79, 99, 111, 99],
-    "MoM":  [108, 110, 116, 100, 91, 81, 80, 72, 69, 80, 101, 112, 109, 105, 102, 92, 94, 83, 80, 85, 102, 113, 109, 85, 79, 73, 79, 88, 102, 110, 87],
-    "YoY":  [114, 121, 122, 119, 95, 80, 89, 78, 80, 93, 109, 99, 95, 89, 102, 90, 87, 86, 81, 82, 99, 107, 88, 98, 80, 71, 79, 81, 100, 100, 71]
-})
-data = data.set_index('Date')
-
-data2 = pd.DataFrame({
-    "Month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"],
-    "Actual":  [25, 45, 167, 70, 71, 46, 51, 94, 62, 56, 38, 112],
-    "M-1":  [21, 66, 143, 83, 30, 63, 23, 79, 53, 61, 61, 142],
-    "Y-1":  [35, 73, 168, 89, 90, 65, 32, 92, 41, 42, 24, 99]
-})
-data2 = data2.set_index('Month')
 
 
 # ---------------------------------------------------- PIE CHART SERVICE -----------------------------------------------------
@@ -239,7 +221,7 @@ daily_rev = numerize.numerize(total_rev_number_M / selected_type.day)
 
 rev_to_target_number = float(total_rev_number_M) / target_revenue_eastern * 100
 rev_to_target = numerize.numerize(float(total_rev_number_M) / target_revenue_eastern * 100)
-rev_to_target_gap = numerize.numerize(target_revenue_eastern - float(total_rev_number_M))
+rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - target_revenue_eastern)
 
 MoM = numerize.numerize(((total_rev_number_M / total_rev_number_M_1) - 1) * 100)
 MoM_gap = numerize.numerize(float(total_rev_number_M - total_rev_number_M_1))
@@ -258,6 +240,7 @@ YoY_gap = numerize.numerize(float(total_rev_number_M - total_rev__number_M_22))
 image_down = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
 image_up = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8')
 
+# -------------------------------------------------------- LINE CHART --------------------------------------------------------
 trend_monthly_rev = (raw_data23.groupby(['Month'])['Rev_sum'].sum()).to_frame().reset_index()
 trend_monthly_rev.columns = ['Month', 'Actual']
 trend_monthly_rev_YoY_data = raw_data22.loc[(raw_data22['Month'] <= selected_type.month -1) | ((raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day))]
@@ -266,9 +249,23 @@ trend_monthly_rev_YoY.columns = ['Month', 'Y-1']
 trend_monthly = pd.merge(trend_monthly_rev, trend_monthly_rev_YoY, on='Month')
 trend_monthly = trend_monthly.set_index('Month')
 trend_monthly.index = trend_monthly.index.astype(str)
-# trend_monthly.index
 trend_monthly.rename(index={'1':'Jan', '2':'Feb', '3':'Mar', '4': 'Apr', '5': 'May', '6': 'Jun', '7': 'Jul'}, inplace=True)
-# trend_monthly.index
+
+current_month_data = raw_data23.loc[((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day))]
+Y_1_month_data = raw_data22.loc[((raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day))]
+M_1_data = raw_data23.loc[((raw_data23['Month'] == selected_type.month-1) & (raw_data23['Date'] <= selected_type.day))]
+
+trend_daily_rev = (current_month_data.groupby(['Date'])['Rev_sum'].sum()).to_frame().reset_index()
+trend_daily_rev.columns = ['Date', 'Actual']
+trend_daily_rev_M_1 = (M_1_data.groupby(['Date'])['Rev_sum'].sum()).to_frame().reset_index()
+trend_daily_rev_Y_1 = (Y_1_month_data.groupby(['Date'])['Rev_sum'].sum()).to_frame().reset_index()
+
+trend_daily_rev = trend_daily_rev.set_index('Date')
+trend_daily_rev_M_1 = trend_daily_rev_M_1.set_index('Date')
+trend_daily_rev_Y_1 = trend_daily_rev_Y_1.set_index('Date')
+
+
+
 
 
 col1, col2, col3, col4 = st.columns([2,2,3,2])
@@ -282,13 +279,15 @@ with col1:
         with col1a:
             bar = st.progress(int(rev_to_target_number))
         with col1b:
-            st.write(f"{rev_to_target}%, -{rev_to_target_gap}")
+            st.write(f"{rev_to_target}%, {rev_to_target_gap}")
 
     with st.container():
         st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
         col1a, col1b = st.columns([4,3])
-        bar = st.progress(45)
-        st.write("45%")
+        with col1a:
+            bar = st.progress(45)
+        with col1b:
+            st.write("45%")
         
 
 with col2:
@@ -381,19 +380,21 @@ with col6:
     col6a.subheader(f"Trend {selected_type} Revenue")
 
     if(selected_type == 'Daily'):
-        lchart = px.line(data, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly)
-        lchart.update_layout(autosize=True, legend_title=None, legend=dict(
+        lchart = px.line(trend_daily_rev, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly, markers=True)
+        lchart.update_layout(autosize=True, legend_title=None, yaxis_title='Revenue', legend=dict(
             orientation = "h",
             xanchor = "center",
             x = 0.5,
             y = -0.2,
             entrywidth=40
         ))
+        lchart.add_traces(go.Scatter(x=trend_daily_rev_M_1.index, y=trend_daily_rev_M_1['Rev_sum'], name='M-1', line_shape="spline"))
+        lchart.add_traces(go.Scatter(x=trend_daily_rev_Y_1.index, y=trend_daily_rev_Y_1['Rev_sum'], name='Y-1', line_shape="spline"))
         lchart.update_xaxes(dtick=1)
         lchart
     else:
-        lchart = px.line(trend_monthly, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly)
-        lchart.update_layout(autosize=True, legend_title=None, legend=dict(
+        lchart = px.line(trend_monthly, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly, markers=True)
+        lchart.update_layout(autosize=True, legend_title=None, yaxis_title='Revenue', legend=dict(
             orientation = "h",
             xanchor = "center",
             x = 0.5,
