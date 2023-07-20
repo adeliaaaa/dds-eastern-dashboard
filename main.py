@@ -130,16 +130,7 @@ raw_data22['Date'] = raw_data22['Date'].astype('int')
 
 target_revenue_eastern = 46671504423.89
 
-# ----------------------------------------------------- PIE CHART CLUSTER ----------------------------------------------------
-cluster = pd.DataFrame({
-    "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur"],
-    "Rev":  np.random.randint(30,190,size=6)
-})
-clusterChart = px.pie(cluster, values='Rev', names='Cluster', color_discrete_sequence= pie_color)
-clusterChart.update_layout(
-    showlegend=False
-)
-clusterChart.update_traces(textinfo='label+percent+value', rotation=45, textfont_size=14)
+
 
 
 # -------------------------------------------------------- TABLE TOP 5 -------------------------------------------------------
@@ -263,6 +254,19 @@ serviceChart.update_layout(
 )
 
 serviceChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percent})", rotation=15, textfont_size=14)
+
+# ----------------------------------------------------- PIE CHART CLUSTER ----------------------------------------------------
+rev_cluster = (current_month_data.groupby(['Cluster'])['Rev_sum'].sum()).to_frame().reset_index()
+rev_cluster = rev_cluster.set_index('Cluster')
+
+rev_cluster = rev_cluster[(rev_cluster.index == 'KOTA BEKASI') | (rev_cluster.index == 'DEPOK')| (rev_cluster.index == 'BOGOR') | (rev_cluster.index == 'SUKABUMI') | (rev_cluster.index == 'BEKASI') | (rev_cluster.index == 'KARAWANG PURWAKARTA')]
+rev_cluster['Rev_sum'] = rev_cluster['Rev_sum'].apply(lambda x: "{:.2f}".format(x/1000000000))
+
+clusterChart = px.pie(rev_cluster, values='Rev_sum', names=rev_cluster.index, color_discrete_sequence= pie_color)
+clusterChart.update_layout(
+    showlegend=False
+)
+clusterChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percent})", rotation=45, textfont_size=14)
 
 
 # ---------------------------------------------------------- DESIGN ----------------------------------------------------------
