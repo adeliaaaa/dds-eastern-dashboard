@@ -114,36 +114,33 @@ def load_data():
     table_rows = db_cursor.fetchall()
     rgb_all = pd.DataFrame(table_rows)
 
+    db_cursor.execute('SELECT service, rev_sum, month, day FROM l4 WHERE regional="EASTERN JABOTABEK"')
+    table_rows = db_cursor.fetchall()
+    l4 = pd.DataFrame(table_rows)
+
 
     max_date_data = datetime.datetime.strptime(max_date_data[0][0], "%d/%m/%Y")
 
-    return max_date_data, raw_data22, raw_data23, rgb_all
+    return max_date_data, raw_data22, raw_data23, rgb_all, l4
 
 
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
-max_date_data, raw_data22, raw_data23, raw_rgb_all = load_data()
+max_date_data, raw_data22, raw_data23, raw_rgb_all, l4 = load_data()
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_rgb_all.columns = ['Date', 'Subs']
+l4.columns = ['Service', 'Rev_sum', 'Month', 'Day']
 raw_data23['Month'] = raw_data23['Month'].astype('int')
 raw_data22['Month'] = raw_data22['Month'].astype('int')
+l4['Month'] = l4['Month'].astype('int')
 raw_data23['Date'] = raw_data23['Date'].astype('int')
 raw_data22['Date'] = raw_data22['Date'].astype('int')
+l4['Day'] = l4['Day'].astype('int')
 
 target_revenue_eastern = 46671504423.89
 
-
-# -------------------------------------------------------- TABLE TOP 5 -------------------------------------------------------
-top5 = pd.DataFrame({
-    "Service": ["Videomax", "Google Playstore", "Upoint", "Transfer Pulsa", "Content RBT"],
-    "M":  ["4.36", "3.88", "1.13", "0.75", "0.28"],
-    "M-1": ["4.33", "4.11", "2.04", "0.71", "0.28"],
-    "MoM":  ["-5.53%", "-44.9%", "0.09%", "-5.53%", "-44.9%"],
-    "YtD":  ["-22.6%", "-64.8%", "-55.5%", "-22.6%", "-64.8%"],
-    "YoY":  ["-27.8%", "-64.8%", "-35.6%", "-27.8%", "-64.8%"]
-})
-top5 = top5.set_index('Service')
-
+image_down = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
+image_up = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8')
 
 # ------------------------------------------------------- TABLE OUTLET -------------------------------------------------------
 outlet = pd.DataFrame({
@@ -164,32 +161,38 @@ with colb:
     'Daily',
     max_date_data,
     max_value=max_date_data,
+    min_value=datetime.datetime(2023, 1, 1),
     label_visibility="hidden")
 
+# -------------------------------------------------------- TOTAL REV ---------------------------------------------------------
 total_rev_number_M = raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
 total_rev_number_M_1 = raw_data23.loc[(raw_data23['Month'] == (selected_type.month - 1)) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
 
+# -------------------------------------------------------- DAILY REV ---------------------------------------------------------
 daily_rev = numerize.numerize(total_rev_number_M / selected_type.day)
 
+# ------------------------------------------------------ REV TO TARGET -------------------------------------------------------
 rev_to_target_number = float(total_rev_number_M) / target_revenue_eastern * 100
 rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - target_revenue_eastern)
 
+# ----------------------------------------------------------- MoM ------------------------------------------------------------
 MoM = numerize.numerize(((total_rev_number_M / total_rev_number_M_1) - 1) * 100)
 MoM_gap = numerize.numerize(float(total_rev_number_M - total_rev_number_M_1))
 
+# ----------------------------------------------------------- Y-1 ------------------------------------------------------------
 y_1_date = datetime.datetime(2022, selected_type.month, selected_type.day)
 total_rev_2022 = raw_data22.loc[(raw_data22['Month'] <= selected_type.month -1) | ((raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day)), 'Rev_sum'].sum()
 total_rev_2023 = raw_data23.loc[(raw_data23['Month'] <= selected_type.month -1) | ((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day)), 'Rev_sum'].sum()
 
+# ----------------------------------------------------------- YtD ------------------------------------------------------------
 YtD = numerize.numerize(((total_rev_2023 / total_rev_2022) - 1) * 100)
 YtD_gap = numerize.numerize(float(total_rev_2023 - total_rev_2022))
 
+# ----------------------------------------------------------- YoY ------------------------------------------------------------
 total_rev__number_M_22 = raw_data22.loc[(raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day), 'Rev_sum'].sum()
 YoY = numerize.numerize(((total_rev_number_M / total_rev__number_M_22) - 1) * 100)
 YoY_gap = numerize.numerize(float(total_rev_number_M - total_rev__number_M_22))
 
-image_down = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
-image_up = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8')
 
 # -------------------------------------------------------- LINE CHART --------------------------------------------------------
 trend_monthly_rev = (raw_data23.groupby(['Month'])['Rev_sum'].sum()).to_frame().reset_index()
@@ -224,9 +227,7 @@ rev_service['Rev_sum'] = rev_service['Rev_sum'].apply(lambda x: "{:.2f}".format(
 
 serviceChart = px.pie(rev_service, values='Rev_sum', names=rev_service.index, color_discrete_sequence= pie_color)
 
-serviceChart.update_layout(
-    showlegend=False
-)
+serviceChart.update_layout(showlegend=False)
 
 serviceChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percent})", rotation=15, textfont_size=14)
 
@@ -252,7 +253,29 @@ last_month = last_month_date.strftime("%d/%m/%Y")
 rgb_all_M = raw_rgb_all.loc[(raw_rgb_all['Date'] == today_date), 'Subs'].sum()
 rgb_all_M_1 = raw_rgb_all.loc[(raw_rgb_all['Date'] == last_month), 'Subs'].sum()
 
+# ------------------------------------------------------ TABLE TOP 5 M -------------------------------------------------------
+l4_this_month_data = l4.loc[((l4['Month'] == selected_type.month) & (l4['Day'] <= selected_type.day))]
+top_5 = (l4_this_month_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
+top_5.columns = ['Service', 'M']
+top_5 = top_5.head(5)
+# top_5['M'] = top_5['M'].apply(lambda x: "{:.2f}".format(x/1000000000)).astype('str')
 
+# ----------------------------------------------------- TABLE TOP 5 M-1 ------------------------------------------------------
+l4_this_month_1_data = l4.loc[(l4['Month'] == selected_type.month-1) & (l4['Day'] <= selected_type.day) & (l4['Service'].isin(top_5['Service']))]
+top_5_M_1 = (l4_this_month_1_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
+top_5_M_1.columns = ['Service', 'M-1']
+# top_5_M_1['M-1'] = top_5_M_1['M-1'].apply(lambda x: "{:.2f}".format(x/1000000000)).astype('str')
+top_5 = pd.merge(top_5, top_5_M_1, on='Service')
+
+# ----------------------------------------------------- TABLE TOP 5 MoM ------------------------------------------------------
+top_5['MoM'] = ((top_5['M'].astype('float') / top_5['M-1'].astype('float')) - 1) * 100
+# top_5['MoM'] = top_5['MoM'].apply(lambda x: "{:.2f}".format(x)).astype('str')
+
+# -------------------------------------------------------- TABLE TOP 5 -------------------------------------------------------
+top_5 = top_5.set_index('Service')
+top_5['MoM'] = top_5['MoM'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
+top_5['M-1'] = top_5['M-1'].apply(lambda x: "{:.2f}".format(x/1000000000)).astype('str')
+top_5['M'] = top_5['M'].apply(lambda x: "{:.2f}".format(x/1000000000)).astype('str')
 
 # ---------------------------------------------------------- DESIGN ----------------------------------------------------------
 
@@ -417,7 +440,7 @@ with col8:
 with col9:
     st.subheader("Top 5 L4 Contributor")
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
-    st.dataframe(top5, use_container_width=True)
+    st.dataframe(top_5, use_container_width=True)
 
 with col10:
     st.subheader("Outlet Digital Aktif & Rev")
