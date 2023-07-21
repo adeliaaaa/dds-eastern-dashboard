@@ -155,30 +155,7 @@ outlet = pd.DataFrame({
 outlet = outlet.set_index('Cluster')
 
 
-
-# th_props = [
-#     ('font-size', '14px'),
-#     ('text-align', 'left'),
-#     ('font-weight', 'bold'),
-#     ('color', '#6d6d6d'),
-#     ('background-color', '#f8f9fb')
-#   ]
-
-                                    
-# td_props = [
-#   ('font-size', '12px')
-#   ]
-                                 
-
-# styles = [
-#   dict(selector="th", props=th_props),
-#   dict(selector="td", props=td_props)
-#   ]
-# top5=top5.style.set_properties(**{'text-align': 'left'}).set_table_styles(styles)
-
-
-
-
+# ---------------------------------------------------------- HEADER ----------------------------------------------------------
 cola, colb = st.columns([6,1])
 with cola:
     st.title(':red[DDS REGIONAL] EASTERN')
@@ -192,11 +169,9 @@ with colb:
 total_rev_number_M = raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
 total_rev_number_M_1 = raw_data23.loc[(raw_data23['Month'] == (selected_type.month - 1)) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
 
-total_rev_M = numerize.numerize(float(raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()))
 daily_rev = numerize.numerize(total_rev_number_M / selected_type.day)
 
 rev_to_target_number = float(total_rev_number_M) / target_revenue_eastern * 100
-rev_to_target = numerize.numerize(float(total_rev_number_M) / target_revenue_eastern * 100)
 rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - target_revenue_eastern)
 
 MoM = numerize.numerize(((total_rev_number_M / total_rev_number_M_1) - 1) * 100)
@@ -269,12 +244,15 @@ clusterChart.update_layout(
 clusterChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percent})", rotation=45, textfont_size=14)
 
 
-# ---------------------------------------------------------- DESIGN ----------------------------------------------------------
-
+# ------------------------------------------------------------ RGB -----------------------------------------------------------
 last_month_date = datetime.datetime(selected_type.year, selected_type.month-1, selected_type.day)
 today_date = selected_type.strftime("%d/%m/%Y")
 last_month = last_month_date.strftime("%d/%m/%Y")
-rgb_all_M = numerize.numerize(float(raw_rgb_all.loc[(raw_rgb_all['Date'] == today_date), 'Subs'].sum()))
+
+rgb_all_M = raw_rgb_all.loc[(raw_rgb_all['Date'] == today_date), 'Subs'].sum()
+rgb_all_M_1 = raw_rgb_all.loc[(raw_rgb_all['Date'] == last_month), 'Subs'].sum()
+
+
 
 # ---------------------------------------------------------- DESIGN ----------------------------------------------------------
 
@@ -289,7 +267,7 @@ with col1:
         with col1a:
             bar = st.progress(int(rev_to_target_number))
         with col1b:
-            st.write(f"{rev_to_target}%, {rev_to_target_gap}")
+            st.write(f"{numerize.numerize(rev_to_target_number)}%, {rev_to_target_gap}")
 
     with st.container():
         st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
@@ -310,7 +288,7 @@ with col2:
     with col2b:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> DAILY REV </div>', unsafe_allow_html=True)
     with col2c:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {total_rev_M} </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {numerize.numerize(float(total_rev_number_M))} </div>', unsafe_allow_html=True)
         
     with col2d:
         st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {daily_rev} </div>', unsafe_allow_html=True)
@@ -370,13 +348,25 @@ with col4:
         st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> RGB </div>', unsafe_allow_html=True)
         
     with col4b:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> MoM </div>', unsafe_allow_html=True)
+        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> MtD </div>', unsafe_allow_html=True)
         
-    with col4c:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {rgb_all_M} </div>', unsafe_allow_html=True)
-        
-    with col4d:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> -0.61% </div>', unsafe_allow_html=True)
+    if(rgb_all_M == 0 or rgb_all_M_1 == 0):
+        with col4c:
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> - </div>', unsafe_allow_html=True)
+            
+        with col4d:
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> - </div> ', unsafe_allow_html=True) 
+                
+    else:
+        with col4c:
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {numerize.numerize(float(rgb_all_M))} </div>', unsafe_allow_html=True)        
+        with col4d:
+            rgb_mtd = ((rgb_all_M/rgb_all_M_1)-1) * 100
+            if(rgb_mtd < 0):
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+            else:
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+    
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)        
 
 col6, col7 = st.columns([6,3])
