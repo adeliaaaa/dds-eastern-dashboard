@@ -123,6 +123,10 @@ def load_data():
 
     return max_date_data, raw_data22, raw_data23, rgb_all, l4
 
+# --------------------------------------------------------- FUNCTION ---------------------------------------------------------
+def color_negative_to_red(val):
+    color = 'red' if val[0] == '-' else 'black'
+    return 'color: %s' % color
 
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
 max_date_data, raw_data22, raw_data23, raw_rgb_all, l4 = load_data()
@@ -264,18 +268,17 @@ top_5 = top_5.head(5)
 l4_this_month_1_data = l4.loc[(l4['Month'] == selected_type.month-1) & (l4['Day'] <= selected_type.day) & (l4['Service'].isin(top_5['Service']))]
 top_5_M_1 = (l4_this_month_1_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
 top_5_M_1.columns = ['Service', 'M-1']
-# top_5_M_1['M-1'] = top_5_M_1['M-1'].apply(lambda x: "{:.2f}".format(x/1000000000)).astype('str')
 top_5 = pd.merge(top_5, top_5_M_1, on='Service')
 
 # ----------------------------------------------------- TABLE TOP 5 MoM ------------------------------------------------------
 top_5['MoM'] = ((top_5['M'].astype('float') / top_5['M-1'].astype('float')) - 1) * 100
-# top_5['MoM'] = top_5['MoM'].apply(lambda x: "{:.2f}".format(x)).astype('str')
 
 # -------------------------------------------------------- TABLE TOP 5 -------------------------------------------------------
 top_5 = top_5.set_index('Service')
 top_5['MoM'] = top_5['MoM'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
 top_5['M-1'] = top_5['M-1'].apply(lambda x: "{:.2f}".format(x/1000000000)).astype('str')
 top_5['M'] = top_5['M'].apply(lambda x: "{:.2f}".format(x/1000000000)).astype('str')
+top_5 = top_5.style.applymap(color_negative_to_red)
 
 # ---------------------------------------------------------- DESIGN ----------------------------------------------------------
 
@@ -470,3 +473,5 @@ def debug():
     st.write("selected_type", selected_type)
     st.write("today", selected_type.strftime("%d/%m/%Y"))
     st.write("last year", y_1_date.strftime("%d/%m/%Y"))
+
+
