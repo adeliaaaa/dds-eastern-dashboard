@@ -118,30 +118,69 @@ def load_data():
     table_rows = db_cursor.fetchall()
     l4 = pd.DataFrame(table_rows)
 
+    db_cursor.execute('SELECT event_date, l4, rev_sum FROM l4_2022')
+    table_rows = db_cursor.fetchall()
+    l4_2022 = pd.DataFrame(table_rows)
+
 
     max_date_data = datetime.datetime.strptime(max_date_data[0][0], "%d/%m/%Y")
 
-    return max_date_data, raw_data22, raw_data23, rgb_all, l4
+    return max_date_data, raw_data22, raw_data23, rgb_all, l4, l4_2022
 
 # --------------------------------------------------------- FUNCTION ---------------------------------------------------------
 def color_negative_to_red(val):
     color = 'red' if val[0] == '-' else 'black'
     return 'color: %s' % color
 
+def regexFromDate2022(day, month):
+    if (day < 10):
+        reg_day = f'(?:0[1-{day}])/'
+    elif(day < 20):
+        days = day-10
+        reg_day = f'(?:0[1-9]|1[0-{days}])/'
+    elif(day < 30):
+        days = day-20
+        reg_day = f'(?:0[1-9]|1[0-9]|2[0-{days}])/'
+    elif(day < 33):
+        days = day-30
+        reg_day = f'(?:0[1-9]|1[0-9]|2[0-9]|3[0-{days}])/'
+
+    if(month < 10):
+        reg_month = f'(?:0[{month}])/2022'
+    elif(month < 13):
+        months = month - 10
+        reg_month = f'(?:0[1-9]|1[{months}])/2022'
+    regex1 = reg_day + reg_month
+
+    if(month != 1):
+        if(month < 10):
+            months = month - 1
+            regex2 = f'(?:0[1-9]|1[0-9]|2[0-9]|3[0-1])/(?:0[1-{months}])/2022'
+        else:
+            months = month - 1 - 12
+            regex2 = f'(?:0[1-9]|1[0-9]|2[0-9]|3[0-1])/(?:0[1-9]|1[{months}])/2022'
+
+    final_regex = '(' + regex1 + ')' + '|' + '(' + regex2 + ')'
+    return final_regex
+
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
-max_date_data, raw_data22, raw_data23, raw_rgb_all, l4 = load_data()
+max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022 = load_data()
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_rgb_all.columns = ['Date', 'Subs']
-l4.columns = ['Service', 'Rev_sum', 'Month', 'Day']
+raw_l4.columns = ['Service', 'Rev_sum', 'Month', 'Day']
+raw_l4_2022.columns = ['Date', 'Service', 'Rev_sum']
 raw_data23['Month'] = raw_data23['Month'].astype('int')
 raw_data22['Month'] = raw_data22['Month'].astype('int')
-l4['Month'] = l4['Month'].astype('int')
+raw_l4['Month'] = raw_l4['Month'].astype('int')
 raw_data23['Date'] = raw_data23['Date'].astype('int')
 raw_data22['Date'] = raw_data22['Date'].astype('int')
-l4['Day'] = l4['Day'].astype('int')
+raw_l4['Day'] = raw_l4['Day'].astype('int')
+
 
 target_revenue_eastern = 46671504423.89
+
+
 
 image_down = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
 image_up = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8')
@@ -258,14 +297,13 @@ rgb_all_M = raw_rgb_all.loc[(raw_rgb_all['Date'] == today_date), 'Subs'].sum()
 rgb_all_M_1 = raw_rgb_all.loc[(raw_rgb_all['Date'] == last_month), 'Subs'].sum()
 
 # ------------------------------------------------------ TABLE TOP 5 M -------------------------------------------------------
-l4_this_month_data = l4.loc[((l4['Month'] == selected_type.month) & (l4['Day'] <= selected_type.day))]
+l4_this_month_data = raw_l4.loc[((raw_l4['Month'] == selected_type.month) & (raw_l4['Day'] <= selected_type.day))]
 top_5 = (l4_this_month_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
 top_5.columns = ['Service', 'M']
 top_5 = top_5.head(5)
-# top_5['M'] = top_5['M'].apply(lambda x: "{:.2f}".format(x/1000000000)).astype('str')
 
 # ----------------------------------------------------- TABLE TOP 5 M-1 ------------------------------------------------------
-l4_this_month_1_data = l4.loc[(l4['Month'] == selected_type.month-1) & (l4['Day'] <= selected_type.day) & (l4['Service'].isin(top_5['Service']))]
+l4_this_month_1_data = raw_l4.loc[(raw_l4['Month'] == selected_type.month-1) & (raw_l4['Day'] <= selected_type.day) & (raw_l4['Service'].isin(top_5['Service']))]
 top_5_M_1 = (l4_this_month_1_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
 top_5_M_1.columns = ['Service', 'M-1']
 top_5 = pd.merge(top_5, top_5_M_1, on='Service')
@@ -273,11 +311,31 @@ top_5 = pd.merge(top_5, top_5_M_1, on='Service')
 # ----------------------------------------------------- TABLE TOP 5 MoM ------------------------------------------------------
 top_5['MoM'] = ((top_5['M'].astype('float') / top_5['M-1'].astype('float')) - 1) * 100
 
+# ----------------------------------------------------- TABLE TOP 5 YtD ------------------------------------------------------
+regex_final = regexFromDate2022(selected_type.day, selected_type.month)
+l4_2022_until_now = raw_l4_2022[raw_l4_2022.Date.str.contains(regex_final, regex=True, na=False)]
+top_5_2022 = l4_2022_until_now.loc[l4_2022_until_now['Service'].isin(top_5['Service'])]
+top_5_2022 = (top_5_2022.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
+top_5_2022.columns = ['Service', '2022']
+
+l4_2023_until_now = raw_l4.loc[ (raw_l4['Month'] <= selected_type.month - 1) | ((raw_l4['Month'] == selected_type.month) & (raw_l4['Day'] <= selected_type.day))]
+top_5_2023 = l4_2023_until_now.loc[l4_2023_until_now['Service'].isin(top_5['Service'])]
+top_5_2023 = (top_5_2023.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
+top_5_2023.columns = ['Service', '2023']
+
+top_5_ytd = pd.DataFrame()
+top_5_ytd['Service'] = top_5['Service']
+top_5_ytd['YtD'] = ((top_5_2023['2023'] / top_5_2022['2022']) - 1) * 100
+top_5_ytd
+
+top_5 = pd.merge(top_5, top_5_ytd, on='Service')
+
 # -------------------------------------------------------- TABLE TOP 5 -------------------------------------------------------
 top_5 = top_5.set_index('Service')
 top_5['MoM'] = top_5['MoM'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
 top_5['M-1'] = top_5['M-1'].apply(lambda x: "{:.2f}".format(x/1000000000)).astype('str')
 top_5['M'] = top_5['M'].apply(lambda x: "{:.2f}".format(x/1000000000)).astype('str')
+top_5['YtD'] = top_5['YtD'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
 top_5 = top_5.style.applymap(color_negative_to_red)
 
 # ---------------------------------------------------------- DESIGN ----------------------------------------------------------
@@ -399,13 +457,13 @@ col6, col7 = st.columns([6,3])
 with col6:
     st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
     col6a, col6b = st.columns([4,1])
-    selected_type = col6b.selectbox(
+    selected_daily_monthly = col6b.selectbox(
     'Daily',
     ('Daily', 'Monthly'), label_visibility="hidden")
 
-    col6a.subheader(f"Trend {selected_type} Revenue")
+    col6a.subheader(f"Trend {selected_daily_monthly} Revenue")
 
-    if(selected_type == 'Daily'):
+    if(selected_daily_monthly == 'Daily'):
         lchart = px.line(trend_daily_rev, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly, markers=True)
         lchart.update_layout(autosize=True, legend_title=None, yaxis_title='Revenue', legend=dict(
             orientation = "h",
@@ -451,14 +509,21 @@ with col10:
     st.dataframe(outlet, use_container_width=True)
 
 
-if st.checkbox('Show raw data'):
-    col1, col2 = st.columns(2)
-    with col1:
-        st.subheader('Raw data22')
-        st.write(raw_data22)
-    with col2:
-        st.subheader('Raw data23')
-        st.write(raw_data23)
+
+
+
+
+
+
+
+# if st.checkbox('Show raw data'):
+#     col1, col2 = st.columns(2)
+#     with col1:
+#         st.subheader('Raw l4_2022')
+#         st.write(l4_2022)
+    # with col2:
+    #     st.subheader('Raw data23')
+    #     st.write(raw_data23)
     # groupped_by = raw_data22.groupby('Cluster')
 
     # st.write(groupped_by.first())
