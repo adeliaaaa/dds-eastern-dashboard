@@ -105,10 +105,10 @@ def load_data():
     table_rows = db_cursor.fetchall()
     raw_data23 = pd.DataFrame(table_rows)
 
-
     db_cursor.execute('select rev_date from digital_2023 order by CAST(month AS int) desc, CAST(date AS int) desc limit 1')
     table_rows = db_cursor.fetchall()
     max_date_data = pd.DataFrame(table_rows)
+    max_date_data = datetime.datetime.strptime(max_date_data[0][0], "%d/%m/%Y")
 
     db_cursor.execute('SELECT bulan, subs FROM rgb_all WHERE reg="EASTERN JABOTABEK"')
     table_rows = db_cursor.fetchall()
@@ -122,10 +122,15 @@ def load_data():
     table_rows = db_cursor.fetchall()
     l4_2022 = pd.DataFrame(table_rows)
 
+    db_cursor.execute("SELECT reg, COUNT(reg) FROM `raw_outlet` WHERE reg='KOTA BEKASI' or reg='DEPOK' or reg='BOGOR' or reg='SUKABUMI' or reg='BEKASI' or reg='KARAWANG PURWAKARTA' GROUP by reg")
+    table_rows = db_cursor.fetchall()
+    raw_outlet = pd.DataFrame(table_rows)
 
-    max_date_data = datetime.datetime.strptime(max_date_data[0][0], "%d/%m/%Y")
+    db_cursor.execute("SELECT cluster, count(rev_sum), sum(rev_sum) FROM `outlet` WHERE trx_sum >= 2 and regional='EASTERN JABOTABEK' group by cluster;")
+    table_rows = db_cursor.fetchall()
+    outlet_data = pd.DataFrame(table_rows)
 
-    return max_date_data, raw_data22, raw_data23, rgb_all, l4, l4_2022
+    return max_date_data, raw_data22, raw_data23, rgb_all, l4, l4_2022, raw_outlet, outlet_data
 
 # --------------------------------------------------------- FUNCTION ---------------------------------------------------------
 def color_negative_to_red(val):
@@ -182,22 +187,27 @@ def regexFromDate2022OneMonth(day, month):
         months = month - 10
         reg_month = f'(?:1[{months}])/2022'
     regex1 = reg_day + reg_month
-    print(regex1)
+
     return regex1
 
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
-max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022 = load_data()
+max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data = load_data()
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_rgb_all.columns = ['Date', 'Subs']
 raw_l4.columns = ['Service', 'Rev_sum', 'Month', 'Day']
 raw_l4_2022.columns = ['Date', 'Service', 'Rev_sum']
+raw_outlet.columns = ['Cluster', 'Outlet Register']
+outlet_data.columns = ['Cluster', 'Outlet', 'Rev_sum']
 raw_data23['Month'] = raw_data23['Month'].astype('int')
 raw_data22['Month'] = raw_data22['Month'].astype('int')
 raw_l4['Month'] = raw_l4['Month'].astype('int')
 raw_data23['Date'] = raw_data23['Date'].astype('int')
 raw_data22['Date'] = raw_data22['Date'].astype('int')
 raw_l4['Day'] = raw_l4['Day'].astype('int')
+raw_outlet['Outlet Register'] = raw_outlet['Outlet Register'].astype('int')
+outlet_data['Outlet'] = outlet_data['Outlet'].astype('int')
+outlet_data['Rev_sum'] = outlet_data['Rev_sum'].astype('int')
 
 
 target_revenue_eastern = 46671504423.89
@@ -206,15 +216,6 @@ target_revenue_eastern = 46671504423.89
 
 image_down = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
 image_up = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8')
-
-# ------------------------------------------------------- TABLE OUTLET -------------------------------------------------------
-outlet = pd.DataFrame({
-    "Cluster": ["Kota Bekasi", "Depok", "Bogor", "Sukabumi", "Bekasi", "Kapur", "Total"],
-    "Outlet":  ["205", "179", "110", "205", "179", "110", "500"],
-    "%":  ["0.08%", "0.10%", "0.05%", "0.08%", "0.10%", "0.05%", "2%"],
-    "Rev":  ["21.6jt", "17.2jt", "12.0jt", "21.6jt", "17.2jt", "12.0jt", "54jt"],
-})
-outlet = outlet.set_index('Cluster')
 
 
 # ---------------------------------------------------------- HEADER ----------------------------------------------------------
@@ -260,7 +261,8 @@ YoY_gap = numerize.numerize(float(total_rev_number_M - total_rev__number_M_22))
 
 
 # -------------------------------------------------------- LINE CHART --------------------------------------------------------
-trend_monthly_rev = (raw_data23.groupby(['Month'])['Rev_sum'].sum()).to_frame().reset_index()
+trend_monthly_rev_actual_data = raw_data23.loc[(raw_data23['Month'] <= selected_type.month -1) | ((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day))]
+trend_monthly_rev = (trend_monthly_rev_actual_data.groupby(['Month'])['Rev_sum'].sum()).to_frame().reset_index()
 trend_monthly_rev.columns = ['Month', 'Actual']
 trend_monthly_rev_YoY_data = raw_data22.loc[(raw_data22['Month'] <= selected_type.month -1) | ((raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day))]
 trend_monthly_rev_YoY = (trend_monthly_rev_YoY_data.groupby(['Month'])['Rev_sum'].sum()).to_frame().reset_index()
@@ -377,9 +379,18 @@ if(not today_r4_data.empty):
     # top_5['2023'] = top_5['2023'].apply(lambda x: "{:.2f}".format(x)).astype('str')
     # top_5['month-22'] = top_5['month-22'].apply(lambda x: "{:.2f}".format(x)).astype('str')
     top_5['YtD'] = top_5['YtD'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
-    top_5['YoY'] = top_5['YoY'].apply(lambda x: "{:.2f}".format(x)).astype('str')
+    top_5['YoY'] = top_5['YoY'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
     top_5 = top_5.style.applymap(color_negative_to_red)
 
+# ------------------------------------------------------- TABLE OUTLET -------------------------------------------------------
+outlet = raw_outlet.set_index('Cluster')
+outlet = pd.merge(outlet, outlet_data, on='Cluster')
+outlet['%'] = (outlet['Outlet'] / outlet['Outlet Register']) * 100
+outlet = outlet.drop(['Outlet Register'], axis=1)
+outlet['%'] = outlet['%'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
+
+
+outlet = outlet.set_index('Cluster')
 # ---------------------------------------------------------- DESIGN ----------------------------------------------------------
 
 col1, col2, col3, col4 = st.columns([2,2,3,2])
