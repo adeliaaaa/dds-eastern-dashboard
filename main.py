@@ -1,194 +1,17 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-from datetime import date
 import datetime
 import plotly.express as px
-from PIL import Image
 import base64
-
-import calendar
 import plotly.graph_objects as go
 
+from function import regexFromDate2022, regexFromDate2022OneMonth, color_negative_to_red, pie_color, load_data, addCustomStyle
 from numerize import numerize
-
-from dotenv import load_dotenv
-load_dotenv()
-import os
-import MySQLdb
 
 st.set_page_config(layout="wide")
 
-# pie_color = px.colors.sequential.deep
-pie_color = px.colors.sequential.Burgyl
-
 # ----------------------------------------------------------- STYLING --------------------------------------------------------
-st.markdown(
-    """
-<style>
-    
-    .css-fg4pbf [data-testid="column"]:has(div.PortMaker) {
-        display: flex;
-        align-items: center;
-        box-shadow: rgb(0 0 0 / 20%) 0px 2px 1px -1px, rgb(0 0 0 / 14%) 0px 1px 1px 0px, rgb(0 0 0 / 12%) 0px 1px 3px 0px;
-        border-radius: 15px;
-        padding: 0.5% 0.7% 0.5% 0.7%;
-    }
-
-    .css-ffhzg2 [data-testid="column"]:has(div.PortMaker) {
-        display: flex;
-        align-items: center;
-        box-shadow: rgb(255 255 255 / 20%) 0px 2px 1px -1px, rgb(255 255 255 / 14%) 0px 1px 1px 0px, rgb(255 255 255 / 12%) 0px 1px 3px 0px;
-        border-radius: 15px;
-        padding: 0.5% 0.7% 0.5% 0.7%;
-    }
-
-    [data-testid="column"] {
-        display: flex;
-        align-items: flex-start;
-    }
-
-    .stProgress .st-au {
-        height: 10px;
-    }
-
-    .stDateInput label{
-        display:none;
-    }
-
-    .stSelectbox label{
-        display:none;
-    }
-
-    h1 {
-        margin: 0px;
-        padding: 0px;
-    }
-
-    h3 {
-        margin: 0px;
-        padding: 0px;
-    }
-
-    .stPlotlyChart {
-        width:100%;
-    }
-
-
-    # .stDataFrame {
-    #     width:100%;
-    # }
-
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-# --------------------------------------------------------- DATABASE ---------------------------------------------------------
-@st.cache_data
-def load_data():
-    connection = MySQLdb.connect(
-        host= 'localhost',
-        user='root',
-        passwd= '',
-        db= 'ddseastern',
-        autocommit = True
-    )
-
-    db_cursor = connection.cursor()
-    # db_cursor.execute('SET workload = OLAP')
-    db_cursor.execute('SELECT rev_date, cluster, rev_sum, month, date, divisi FROM digital_2022 WHERE reg = "EASTERN JABOTABEK"')
-    table_rows = db_cursor.fetchall()
-    raw_data22 = pd.DataFrame(table_rows)
-
-    db_cursor.execute('SELECT rev_date, cluster, rev_sum, month, date, divisi FROM digital_2023 WHERE reg = "EASTERN JABOTABEK"')
-    table_rows = db_cursor.fetchall()
-    raw_data23 = pd.DataFrame(table_rows)
-
-    db_cursor.execute('select rev_date from digital_2023 order by CAST(month AS int) desc, CAST(date AS int) desc limit 1')
-    table_rows = db_cursor.fetchall()
-    max_date_data = pd.DataFrame(table_rows)
-    max_date_data = datetime.datetime.strptime(max_date_data[0][0], "%d/%m/%Y")
-
-    db_cursor.execute('SELECT bulan, subs FROM rgb_all WHERE reg="06.Eastern Jabotabek"')
-    table_rows = db_cursor.fetchall()
-    rgb_all = pd.DataFrame(table_rows)
-
-    db_cursor.execute('SELECT service, rev_sum, month, day FROM l4 WHERE regional="EASTERN JABOTABEK"')
-    table_rows = db_cursor.fetchall()
-    l4 = pd.DataFrame(table_rows)
-
-    db_cursor.execute('SELECT event_date, l4, rev_sum FROM l4_2022')
-    table_rows = db_cursor.fetchall()
-    l4_2022 = pd.DataFrame(table_rows)
-
-    db_cursor.execute("SELECT reg, COUNT(reg) FROM `raw_outlet` WHERE reg='KOTA BEKASI' or reg='DEPOK' or reg='BOGOR' or reg='SUKABUMI' or reg='BEKASI' or reg='KARAWANG PURWAKARTA' GROUP by reg")
-    table_rows = db_cursor.fetchall()
-    raw_outlet = pd.DataFrame(table_rows)
-
-    db_cursor.execute("SELECT cluster, count(rev_sum), sum(rev_sum) FROM `outlet` WHERE trx_sum >= 2 and regional='EASTERN JABOTABEK' group by cluster;")
-    table_rows = db_cursor.fetchall()
-    outlet_data = pd.DataFrame(table_rows)
-
-    return max_date_data, raw_data22, raw_data23, rgb_all, l4, l4_2022, raw_outlet, outlet_data
-
-# --------------------------------------------------------- FUNCTION ---------------------------------------------------------
-def color_negative_to_red(val):
-    color = 'red' if val[0] == '-' else 'black'
-    return 'color: %s' % color
-
-def regexFromDate2022(day, month):
-    if (day < 10):
-        reg_day = f'(?:0[1-{day}])/'
-    elif(day < 20):
-        days = day-10
-        reg_day = f'(?:0[1-9]|1[0-{days}])/'
-    elif(day < 30):
-        days = day-20
-        reg_day = f'(?:0[1-9]|1[0-9]|2[0-{days}])/'
-    elif(day < 33):
-        days = day-30
-        reg_day = f'(?:0[1-9]|1[0-9]|2[0-9]|3[0-{days}])/'
-
-    if(month < 10):
-        reg_month = f'(?:0[{month}])/2022'
-    elif(month < 13):
-        months = month - 10
-        reg_month = f'(?:0[1-9]|1[{months}])/2022'
-    regex1 = reg_day + reg_month
-
-    if(month != 1):
-        if(month < 10):
-            months = month - 1
-            regex2 = f'(?:0[1-9]|1[0-9]|2[0-9]|3[0-1])/(?:0[1-{months}])/2022'
-        else:
-            months = month - 1 - 12
-            regex2 = f'(?:0[1-9]|1[0-9]|2[0-9]|3[0-1])/(?:0[1-9]|1[{months}])/2022'
-
-    final_regex = '(' + regex1 + ')' + '|' + '(' + regex2 + ')'
-    return final_regex
-
-def regexFromDate2022OneMonth(day, month):
-    if (day < 10):
-        reg_day = f'(?:0[1-{day}])/'
-    elif(day < 20):
-        days = day-10
-        reg_day = f'(?:0[1-9]|1[0-{days}])/'
-    elif(day < 30):
-        days = day-20
-        reg_day = f'(?:0[1-9]|1[0-9]|2[0-{days}])/'
-    elif(day < 33):
-        days = day-30
-        reg_day = f'(?:0[1-9]|1[0-9]|2[0-9]|3[0-{days}])/'
-
-    if(month < 10):
-        reg_month = f'(?:0[{month}])/2022'
-    elif(month < 13):
-        months = month - 10
-        reg_month = f'(?:1[{months}])/2022'
-    regex1 = reg_day + reg_month
-
-    return regex1
+addCustomStyle()
 
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
 max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data = load_data()
@@ -211,8 +34,6 @@ outlet_data['Rev_sum'] = outlet_data['Rev_sum'].astype('int')
 
 
 target_revenue_eastern = 46671504423.89
-
-
 
 image_down = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
 image_up = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8')
@@ -258,7 +79,6 @@ YtD_gap = numerize.numerize(float(total_rev_2023 - total_rev_2022))
 total_rev__number_M_22 = raw_data22.loc[(raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day), 'Rev_sum'].sum()
 YoY = numerize.numerize(((total_rev_number_M / total_rev__number_M_22) - 1) * 100)
 YoY_gap = numerize.numerize(float(total_rev_number_M - total_rev__number_M_22))
-
 
 # -------------------------------------------------------- LINE CHART --------------------------------------------------------
 trend_monthly_rev_actual_data = raw_data23.loc[(raw_data23['Month'] <= selected_type.month -1) | ((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day))]
@@ -389,11 +209,10 @@ outlet = outlet.drop(['Outlet Register'], axis=1)
 outlet['Outlet'] = outlet['Outlet'].astype('str')
 outlet['%'] = outlet['%'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
 
-
 outlet = outlet.set_index('Cluster')
 
+# ---------------------------------------------------------- DESIGN ----------------------------------------------------------
 def createUI():
-    # ---------------------------------------------------------- DESIGN ----------------------------------------------------------
     col1, col2, col3, col4 = st.columns([2,2,3,2])
     with col1:
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
@@ -414,11 +233,9 @@ def createUI():
             with col1b:
                 st.write("45%")
             
-
     with col2:
         col2a, col2b = st.columns(2)
         col2c, col2d = st.columns(2)
-
 
         with col2a:
             st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> TOTAL REV </div>', unsafe_allow_html=True)
@@ -487,12 +304,11 @@ def createUI():
         with col4b:
             st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> MoM </div>', unsafe_allow_html=True)
             
-
         with col4c:
             st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {numerize.numerize(float(rgbM.iloc[0]["Subs"]))} </div>', unsafe_allow_html=True)        
+        
         with col4d:
             rgb_mtd = ((rgbM.iloc[0]['Subs']/rgbM_1.iloc[0]['Subs'])-1) * 100
-            print(rgb_mtd)
             if(rgb_mtd < 0):
                 st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
             else:
@@ -559,34 +375,3 @@ def createUI():
         st.dataframe(outlet, use_container_width=True)
 
 createUI()
-
-
-
-
-
-
-
-# if st.checkbox('Show raw data'):
-#     col1, col2 = st.columns(2)
-#     with col1:
-#         st.subheader('Raw l4_2022')
-#         st.write(l4_2022)
-    # with col2:
-    #     st.subheader('Raw data23')
-    #     st.write(raw_data23)
-    # groupped_by = raw_data22.groupby('Cluster')
-
-    # st.write(groupped_by.first())
-    # st.subheader('Data Bogor')
-    # st.write(groupped_by.get_group('BOGOR'))
-
-def debug():
-    st.write("m", total_rev_number_M)
-    st.write("m-1", total_rev_number_M_1)
-    st.write("total rev 22", total_rev_2022)
-    st.write("total rev 23", total_rev_2023)
-    st.write("selected_type", selected_type)
-    st.write("today", selected_type.strftime("%d/%m/%Y"))
-    st.write("last year", y_1_date.strftime("%d/%m/%Y"))
-
-
