@@ -110,7 +110,7 @@ def load_data():
     max_date_data = pd.DataFrame(table_rows)
     max_date_data = datetime.datetime.strptime(max_date_data[0][0], "%d/%m/%Y")
 
-    db_cursor.execute('SELECT bulan, subs FROM rgb_all WHERE reg="EASTERN JABOTABEK"')
+    db_cursor.execute('SELECT bulan, subs FROM rgb_all WHERE reg="06.Eastern Jabotabek"')
     table_rows = db_cursor.fetchall()
     rgb_all = pd.DataFrame(table_rows)
 
@@ -391,180 +391,181 @@ outlet['%'] = outlet['%'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
 
 
 outlet = outlet.set_index('Cluster')
-# ---------------------------------------------------------- DESIGN ----------------------------------------------------------
 
-col1, col2, col3, col4 = st.columns([2,2,3,2])
-with col1:
-    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
-    with st.container():
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE TO TARGET </div>', unsafe_allow_html=True)
-        col1a, col1b = st.columns([4,3])
-        gap = "1.16Mn"
-        
-        with col1a:
-            bar = st.progress(int(rev_to_target_number))
-        with col1b:
-            st.write(f"{numerize.numerize(rev_to_target_number)}%, {rev_to_target_gap}")
-
-    with st.container():
-        st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
-        col1a, col1b = st.columns([4,3])
-        with col1a:
-            bar = st.progress(45)
-        with col1b:
-            st.write("45%")
-        
-
-with col2:
-    col2a, col2b = st.columns(2)
-    col2c, col2d = st.columns(2)
-
-
-    with col2a:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> TOTAL REV </div>', unsafe_allow_html=True)
-    with col2b:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> DAILY REV </div>', unsafe_allow_html=True)
-    with col2c:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {numerize.numerize(float(total_rev_number_M))} </div>', unsafe_allow_html=True)
-        
-    with col2d:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {daily_rev} </div>', unsafe_allow_html=True)
-    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
-
-
-with col3:
-    col3a, col3b, col3c = st.columns(3)
-    col3d, col3e, col3f = st.columns(3)
-    col3g, col3h, col3i = st.columns(3)
-    col3j, col3k, col3l = st.columns(3)
-
-    with col3a:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> MoM </div> ', unsafe_allow_html=True)
-
-    with col3b:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> YtD </div>', unsafe_allow_html=True)
-
-    with col3c:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> YoY </div>', unsafe_allow_html=True)
-
-    with col3d:
-        if(MoM_gap[0] == '-'):
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
-        else:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
-    with col3e:
-        if(YtD_gap[0] == '-'):
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div>', unsafe_allow_html=True)
-        else:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div>', unsafe_allow_html=True)
-    with col3f:
-        if(YoY_gap[0] == '-'):
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div>', unsafe_allow_html=True)
-        else:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div>', unsafe_allow_html=True)
-    with col3g:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div> ', unsafe_allow_html=True)
-    with col3h:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
-    with col3i:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
-    with col3j:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM_gap} </div> ', unsafe_allow_html=True)
-    with col3k:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD_gap} </div>', unsafe_allow_html=True)
-    with col3l:
-        st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY_gap} </div>', unsafe_allow_html=True)
-    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
-
-
-with col4:
-    col4a, col4b = st.columns(2)
-    col4c, col4d = st.columns(2)
-
-    with col4a:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> RGB </div>', unsafe_allow_html=True)
-        
-    with col4b:
-        st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> MtD </div>', unsafe_allow_html=True)
-        
-    if(rgb_all_M == 0 or rgb_all_M_1 == 0):
-        with col4c:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> - </div>', unsafe_allow_html=True)
+def createUI():
+    # ---------------------------------------------------------- DESIGN ----------------------------------------------------------
+    col1, col2, col3, col4 = st.columns([2,2,3,2])
+    with col1:
+        st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
+        with st.container():
+            st.write(f'<div style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE TO TARGET </div>', unsafe_allow_html=True)
+            col1a, col1b = st.columns([4,3])
             
-        with col4d:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> - </div> ', unsafe_allow_html=True) 
-                
-    else:
-        with col4c:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {numerize.numerize(float(rgb_all_M))} </div>', unsafe_allow_html=True)        
-        with col4d:
-            rgb_mtd = ((rgb_all_M/rgb_all_M_1)-1) * 100
-            if(rgb_mtd < 0):
-                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+            with col1a:
+                st.progress(int(rev_to_target_number))
+            with col1b:
+                st.write(f"{numerize.numerize(rev_to_target_number)}%, {rev_to_target_gap}")
+
+        with st.container():
+            st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
+            col1a, col1b = st.columns([4,3])
+            with col1a:
+                st.progress(45)
+            with col1b:
+                st.write("45%")
+            
+
+    with col2:
+        col2a, col2b = st.columns(2)
+        col2c, col2d = st.columns(2)
+
+
+        with col2a:
+            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> TOTAL REV </div>', unsafe_allow_html=True)
+        with col2b:
+            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> DAILY REV </div>', unsafe_allow_html=True)
+        with col2c:
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {numerize.numerize(float(total_rev_number_M))} </div>', unsafe_allow_html=True)
+            
+        with col2d:
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {daily_rev} </div>', unsafe_allow_html=True)
+        st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
+
+
+    with col3:
+        col3a, col3b, col3c = st.columns(3)
+        col3d, col3e, col3f = st.columns(3)
+        col3g, col3h, col3i = st.columns(3)
+        col3j, col3k, col3l = st.columns(3)
+
+        with col3a:
+            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> MoM </div> ', unsafe_allow_html=True)
+
+        with col3b:
+            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> YtD </div>', unsafe_allow_html=True)
+
+        with col3c:
+            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> YoY </div>', unsafe_allow_html=True)
+
+        with col3d:
+            if(MoM_gap[0] == '-'):
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
             else:
-                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
-    
-    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)        
-
-col6, col7 = st.columns([6,3])
-with col6:
-    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
-    col6a, col6b = st.columns([4,1])
-    selected_daily_monthly = col6b.selectbox(
-    'Daily',
-    ('Daily', 'Monthly'), label_visibility="hidden")
-
-    col6a.subheader(f"Trend {selected_daily_monthly} Revenue")
-
-    if(selected_daily_monthly == 'Daily'):
-        lchart = px.line(trend_daily_rev, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly, markers=True)
-        lchart.update_layout(autosize=True, legend_title=None, yaxis_title='Revenue', legend=dict(
-            orientation = "h",
-            xanchor = "center",
-            x = 0.5,
-            y = -0.2,
-            entrywidth=40
-        ))
-        lchart.add_traces(go.Scatter(x=trend_daily_rev_M_1.index, y=trend_daily_rev_M_1['Rev_sum'], name='M-1', line_shape="spline", mode='markers+lines'))
-        lchart.add_traces(go.Scatter(x=trend_daily_rev_Y_1.index, y=trend_daily_rev_Y_1['Rev_sum'], name='Y-1', line_shape="spline", mode='markers+lines'))
-        lchart.update_xaxes(dtick=1)
-        lchart
-    else:
-        lchart = px.line(trend_monthly, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly, markers=True)
-        lchart.update_layout(autosize=True, legend_title=None, yaxis_title='Revenue', legend=dict(
-            orientation = "h",
-            xanchor = "center",
-            x = 0.5,
-            y = -0.2,
-            entrywidth=40
-        ))
-        lchart
-
-with col7:
-    st.subheader("By Service")
-    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
-    st.plotly_chart(serviceChart, use_container_width=True)
-
-col8, col9, col10 = st.columns([3,3,2])
-with col8:
-    st.subheader("By Cluster")
-    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
-    st.plotly_chart(clusterChart, use_container_width=True)
-
-with col9:
-    st.subheader("Top 5 L4 Contributor")
-    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
-    if(today_r4_data.empty):
-        st.write("Data not updated until selected date")
-    else:
-        st.dataframe(top_5, use_container_width=True)
-
-with col10:
-    st.subheader("Outlet Digital Aktif & Rev")
-    st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
-    st.dataframe(outlet, use_container_width=True)
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+        with col3e:
+            if(YtD_gap[0] == '-'):
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div>', unsafe_allow_html=True)
+            else:
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div>', unsafe_allow_html=True)
+        with col3f:
+            if(YoY_gap[0] == '-'):
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div>', unsafe_allow_html=True)
+            else:
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div>', unsafe_allow_html=True)
+        with col3g:
+            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div> ', unsafe_allow_html=True)
+        with col3h:
+            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
+        with col3i:
+            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
+        with col3j:
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM_gap} </div> ', unsafe_allow_html=True)
+        with col3k:
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD_gap} </div>', unsafe_allow_html=True)
+        with col3l:
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY_gap} </div>', unsafe_allow_html=True)
+        st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 
+    with col4:
+        col4a, col4b = st.columns(2)
+        col4c, col4d = st.columns(2)
+
+        with col4a:
+            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> RGB </div>', unsafe_allow_html=True)
+            
+        with col4b:
+            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> MtD </div>', unsafe_allow_html=True)
+            
+        if(rgb_all_M == 0 or rgb_all_M_1 == 0):
+        # if(rgb_all_M.empty or rgb_all_M_1.empty):
+            with col4c:
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> - </div>', unsafe_allow_html=True)
+                
+            with col4d:
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> - </div> ', unsafe_allow_html=True) 
+                    
+        else:
+            with col4c:
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {numerize.numerize(float(rgb_all_M))} </div>', unsafe_allow_html=True)        
+            with col4d:
+                rgb_mtd = ((rgb_all_M/rgb_all_M_1)-1) * 100
+                if(rgb_mtd < 0):
+                    st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+                else:
+                    st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+        
+        st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)        
+
+    col6, col7 = st.columns([6,3])
+    with col6:
+        st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
+        col6a, col6b = st.columns([4,1])
+        selected_daily_monthly = col6b.selectbox(
+        'Daily',
+        ('Daily', 'Monthly'), label_visibility="hidden")
+
+        col6a.subheader(f"Trend {selected_daily_monthly} Revenue")
+
+        if(selected_daily_monthly == 'Daily'):
+            lchart = px.line(trend_daily_rev, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly, markers=True)
+            lchart.update_layout(autosize=True, legend_title=None, yaxis_title='Revenue', legend=dict(
+                orientation = "h",
+                xanchor = "center",
+                x = 0.5,
+                y = -0.2,
+                entrywidth=40
+            ))
+            lchart.add_traces(go.Scatter(x=trend_daily_rev_M_1.index, y=trend_daily_rev_M_1['Rev_sum'], name='M-1', line_shape="spline", mode='markers+lines'))
+            lchart.add_traces(go.Scatter(x=trend_daily_rev_Y_1.index, y=trend_daily_rev_Y_1['Rev_sum'], name='Y-1', line_shape="spline", mode='markers+lines'))
+            lchart.update_xaxes(dtick=1)
+            lchart
+        else:
+            lchart = px.line(trend_monthly, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly, markers=True)
+            lchart.update_layout(autosize=True, legend_title=None, yaxis_title='Revenue', legend=dict(
+                orientation = "h",
+                xanchor = "center",
+                x = 0.5,
+                y = -0.2,
+                entrywidth=40
+            ))
+            lchart
+
+    with col7:
+        st.subheader("By Service")
+        st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
+        st.plotly_chart(serviceChart, use_container_width=True)
+
+    col8, col9, col10 = st.columns([4,4,3])
+    with col8:
+        st.subheader("By Cluster")
+        st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
+        st.plotly_chart(clusterChart, use_container_width=True)
+
+    with col9:
+        st.subheader("Top 5 L4 Contributor")
+        st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
+        if(today_r4_data.empty):
+            st.write("Data not updated until selected date")
+        else:
+            st.dataframe(top_5, use_container_width=True)
+
+    with col10:
+        st.subheader("Outlet Digital Aktif & Rev")
+        st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
+        st.dataframe(outlet, use_container_width=True)
+
+createUI()
 
 
 
