@@ -165,6 +165,16 @@ def addCustomStyle():
             width:100%;
         }
 
+        .css-ffhzg2 .eastern-color{
+            color: white;
+            margin-left: 2px;
+        }
+
+        .css-fg4pbf .eastern-color{
+            color: black;
+            margin-left: 2px;
+        }
+
 
         # .stDataFrame {
         #     width:100%;
