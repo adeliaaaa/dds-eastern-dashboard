@@ -3,9 +3,14 @@ import pandas as pd
 import MySQLdb
 import streamlit as st
 import datetime
+import base64
 
 # ----------------------------------------------------------- CONST ----------------------------------------------------------
-pie_color = px.colors.sequential.Burgyl
+PIE_COLOR = px.colors.sequential.Burgyl
+TARGET_REVENUE_EASTERN = 46671504423.89
+
+IMAGE_DOWN = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
+IMAGE_UP = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8')
 
 # --------------------------------------------------------- DATABASE ---------------------------------------------------------
 @st.cache_data
@@ -184,3 +189,17 @@ def addCustomStyle():
     """,
         unsafe_allow_html=True,
     )
+
+def serviceToDigitalNameFormat(service):
+
+    if(service == 'GAMES MARKETPLACE'):
+        new_service = 'Games Marketplace'
+    elif(service == 'VIDEO'):
+        new_service = 'Video'
+    elif(service == 'DIGITAL MUSIC'):
+        new_service = 'Digital Music'
+    elif(service == 'VAS CONTENT'):
+        new_service = 'VAS Content'
+    elif(service == 'DIGITAL BANKING'):
+        new_service = 'Digital Banking'
+    return new_service

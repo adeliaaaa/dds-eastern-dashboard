@@ -5,7 +5,7 @@ import plotly.express as px
 import base64
 import plotly.graph_objects as go
 
-from function import regexFromDate2022, regexFromDate2022OneMonth, color_negative_to_red, pie_color, load_data, addCustomStyle
+from function import regexFromDate2022, regexFromDate2022OneMonth, color_negative_to_red, PIE_COLOR, load_data, addCustomStyle, serviceToDigitalNameFormat, TARGET_REVENUE_EASTERN, IMAGE_DOWN, IMAGE_UP
 from numerize import numerize
 
 st.set_page_config(layout="wide")
@@ -15,7 +15,6 @@ addCustomStyle()
 
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
 max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data = load_data()
-raw_data23
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_rgb_all.columns = ['Date', 'Subs']
@@ -32,11 +31,6 @@ raw_l4['Day'] = raw_l4['Day'].astype('int')
 raw_outlet['Outlet Register'] = raw_outlet['Outlet Register'].astype('int')
 outlet_data['Outlet'] = outlet_data['Outlet'].astype('int')
 outlet_data['Rev_sum'] = outlet_data['Rev_sum'].astype('int')
-
-target_revenue_eastern = 46671504423.89
-
-image_down = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
-image_up = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8')
 
 # ---------------------------------------------------------- HEADER ----------------------------------------------------------
 cola, colb = st.columns([6,6])
@@ -64,15 +58,16 @@ with cola:
     st.write(f'<div style="font-weight: 1000; height:100%; display: flex; justify-content: flex-start; font-size:2.7vw;"> {selected_service} </div>', unsafe_allow_html=True)
 
 # -------------------------------------------------------- TOTAL REV ---------------------------------------------------------
-total_rev_number_M = raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
-total_rev_number_M_1 = raw_data23.loc[(raw_data23['Month'] == (selected_type.month - 1)) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+service_name = serviceToDigitalNameFormat(selected_service)
+total_rev_number_M = raw_data23.loc[(raw_data23['Service'] == service_name) & (raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+total_rev_number_M_1 = raw_data23.loc[(raw_data23['Service'] == service_name) & (raw_data23['Month'] == (selected_type.month - 1)) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
 
 # -------------------------------------------------------- DAILY REV ---------------------------------------------------------
 daily_rev = numerize.numerize(total_rev_number_M / selected_type.day)
 
 # ------------------------------------------------------ REV TO TARGET -------------------------------------------------------
-rev_to_target_number = float(total_rev_number_M) / target_revenue_eastern * 100
-rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - target_revenue_eastern)
+rev_to_target_number = float(total_rev_number_M) / TARGET_REVENUE_EASTERN * 100
+rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - TARGET_REVENUE_EASTERN)
 
 # ----------------------------------------------------------- MoM ------------------------------------------------------------
 MoM = numerize.numerize(((total_rev_number_M / total_rev_number_M_1) - 1) * 100)
@@ -124,7 +119,7 @@ rev_service = rev_service.set_index('Service')
 rev_service = rev_service[(rev_service.index == 'Digital Banking') | (rev_service.index == 'Digital Music')| (rev_service.index == 'Games Marketplace') | (rev_service.index == 'VAS Content') | (rev_service.index == 'Video')]
 rev_service['Rev_sum'] = rev_service['Rev_sum'].apply(lambda x: "{:.2f}".format(x/1000000000))
 
-serviceChart = px.pie(rev_service, values='Rev_sum', names=rev_service.index, color_discrete_sequence= pie_color)
+serviceChart = px.pie(rev_service, values='Rev_sum', names=rev_service.index, color_discrete_sequence= PIE_COLOR)
 
 serviceChart.update_layout(showlegend=False)
 
@@ -137,7 +132,7 @@ rev_cluster = rev_cluster.set_index('Cluster')
 rev_cluster = rev_cluster[(rev_cluster.index == 'KOTA BEKASI') | (rev_cluster.index == 'DEPOK')| (rev_cluster.index == 'BOGOR') | (rev_cluster.index == 'SUKABUMI') | (rev_cluster.index == 'BEKASI') | (rev_cluster.index == 'KARAWANG PURWAKARTA')]
 rev_cluster['Rev_sum'] = rev_cluster['Rev_sum'].apply(lambda x: "{:.2f}".format(x/1000000000))
 
-clusterChart = px.pie(rev_cluster, values='Rev_sum', names=rev_cluster.index, color_discrete_sequence= pie_color)
+clusterChart = px.pie(rev_cluster, values='Rev_sum', names=rev_cluster.index, color_discrete_sequence= PIE_COLOR)
 clusterChart.update_layout(
     showlegend=False
 )
@@ -278,19 +273,19 @@ def createServiceUI():
 
         with col3d:
             if(MoM_gap[0] == '-'):
-                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM}% <img src="data:image/png;base64,{IMAGE_DOWN}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
             else:
-                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM}% <img src="data:image/png;base64,{IMAGE_UP}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
         with col3e:
             if(YtD_gap[0] == '-'):
-                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div>', unsafe_allow_html=True)
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD}% <img src="data:image/png;base64,{IMAGE_DOWN}" width="21" height="21"/> </div>', unsafe_allow_html=True)
             else:
-                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div>', unsafe_allow_html=True)
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD}% <img src="data:image/png;base64,{IMAGE_UP}" width="21" height="21"/> </div>', unsafe_allow_html=True)
         with col3f:
             if(YoY_gap[0] == '-'):
-                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div>', unsafe_allow_html=True)
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{IMAGE_DOWN}" width="21" height="21"/> </div>', unsafe_allow_html=True)
             else:
-                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div>', unsafe_allow_html=True)
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{IMAGE_UP}" width="21" height="21"/> </div>', unsafe_allow_html=True)
         with col3g:
             st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div> ', unsafe_allow_html=True)
         with col3h:
@@ -322,9 +317,9 @@ def createServiceUI():
         with col4d:
             rgb_mtd = ((rgbM.iloc[0]['Subs']/rgbM_1.iloc[0]['Subs'])-1) * 100
             if(rgb_mtd < 0):
-                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{IMAGE_DOWN}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
             else:
-                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{IMAGE_UP}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
         
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)        
 
