@@ -317,8 +317,9 @@ last_month_date = datetime.datetime(selected_type.year, selected_type.month-1, s
 today_date = selected_type.strftime("%d/%m/%Y")
 last_month = last_month_date.strftime("%d/%m/%Y")
 
-rgb_all_M = raw_rgb_all.loc[(raw_rgb_all['Date'] == today_date), 'Subs'].sum()
-rgb_all_M_1 = raw_rgb_all.loc[(raw_rgb_all['Date'] == last_month), 'Subs'].sum()
+rgbbb = (raw_rgb_all.groupby(['Date'])['Subs'].sum()).to_frame().reset_index().sort_values('Date', ascending=False)
+rgbM = rgbbb.take([0])
+rgbM_1 = rgbbb.take([1])
 
 # ------------------------------------------------------ TABLE TOP 5 M -------------------------------------------------------
 today_r4_data = raw_l4.loc[((raw_l4['Month'] == selected_type.month) & (raw_l4['Day'] == selected_type.day))]
@@ -375,9 +376,7 @@ if(not today_r4_data.empty):
     top_5['MoM'] = top_5['MoM'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
     top_5['M-1'] = top_5['M-1'].apply(lambda x: "{:.2f}".format(x/1000000000)).astype('str')
     top_5['M'] = top_5['M'].apply(lambda x: "{:.2f}".format(x/1000000000)).astype('str')
-    # top_5['2022'] = top_5['2022'].apply(lambda x: "{:.2f}".format(x)).astype('str')
-    # top_5['2023'] = top_5['2023'].apply(lambda x: "{:.2f}".format(x)).astype('str')
-    # top_5['month-22'] = top_5['month-22'].apply(lambda x: "{:.2f}".format(x)).astype('str')
+
     top_5['YtD'] = top_5['YtD'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
     top_5['YoY'] = top_5['YoY'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
     top_5 = top_5.style.applymap(color_negative_to_red)
@@ -387,6 +386,7 @@ outlet = raw_outlet.set_index('Cluster')
 outlet = pd.merge(outlet, outlet_data, on='Cluster')
 outlet['%'] = (outlet['Outlet'] / outlet['Outlet Register']) * 100
 outlet = outlet.drop(['Outlet Register'], axis=1)
+outlet['Outlet'] = outlet['Outlet'].astype('str')
 outlet['%'] = outlet['%'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
 
 
@@ -485,25 +485,18 @@ def createUI():
             st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> RGB </div>', unsafe_allow_html=True)
             
         with col4b:
-            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> MtD </div>', unsafe_allow_html=True)
+            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> MoM </div>', unsafe_allow_html=True)
             
-        if(rgb_all_M == 0 or rgb_all_M_1 == 0):
-        # if(rgb_all_M.empty or rgb_all_M_1.empty):
-            with col4c:
-                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> - </div>', unsafe_allow_html=True)
-                
-            with col4d:
-                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> - </div> ', unsafe_allow_html=True) 
-                    
-        else:
-            with col4c:
-                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {numerize.numerize(float(rgb_all_M))} </div>', unsafe_allow_html=True)        
-            with col4d:
-                rgb_mtd = ((rgb_all_M/rgb_all_M_1)-1) * 100
-                if(rgb_mtd < 0):
-                    st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
-                else:
-                    st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+
+        with col4c:
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {numerize.numerize(float(rgbM.iloc[0]["Subs"]))} </div>', unsafe_allow_html=True)        
+        with col4d:
+            rgb_mtd = ((rgbM.iloc[0]['Subs']/rgbM_1.iloc[0]['Subs'])-1) * 100
+            print(rgb_mtd)
+            if(rgb_mtd < 0):
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{image_down}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+            else:
+                st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{image_up}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
         
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)        
 
