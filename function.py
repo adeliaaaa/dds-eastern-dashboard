@@ -4,6 +4,8 @@ import MySQLdb
 import streamlit as st
 import datetime
 import base64
+import warnings
+
 
 # ----------------------------------------------------------- CONST ----------------------------------------------------------
 PIE_COLOR = px.colors.sequential.Burgyl
@@ -119,6 +121,8 @@ def regexFromDate2022OneMonth(day, month):
     return regex1
 
 def addCustomStyle():
+    warnings.filterwarnings("ignore", 'This pattern has match groups')
+    
     st.markdown(
         """
     <style>
