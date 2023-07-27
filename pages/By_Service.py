@@ -331,7 +331,7 @@ def createServiceUI():
         'Daily',
         ('Daily', 'Monthly'), label_visibility="hidden")
 
-        col6a.subheader(f"Trend {selected_daily_monthly} Revenue")
+        col6a.subheader(f"Trend {selected_daily_monthly} Revenue {service_name}")
 
         if(selected_daily_monthly == 'Daily'):
             lchart = px.line(trend_daily_rev, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly, markers=True)
