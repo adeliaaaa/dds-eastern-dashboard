@@ -49,7 +49,10 @@ with colb:
 
 # -------------------------------------------------------- TOTAL REV ---------------------------------------------------------
 total_rev_number_M = raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
-total_rev_number_M_1 = raw_data23.loc[(raw_data23['Month'] == (selected_type.month - 1)) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+if(selected_type.month == 1):
+    total_rev_number_M_1 = raw_data22.loc[(raw_data22['Month'] == 12) & (raw_data22['Date'] <= selected_type.day), 'Rev_sum'].sum()
+else:
+    total_rev_number_M_1 = raw_data23.loc[(raw_data23['Month'] == (selected_type.month - 1)) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
 
 # -------------------------------------------------------- DAILY REV ---------------------------------------------------------
 daily_rev = total_rev_number_M / selected_type.day
@@ -91,7 +94,10 @@ trend_monthly.rename(index={'1':'Jan', '2':'Feb', '3':'Mar', '4': 'Apr', '5': 'M
 
 current_month_data = raw_data23.loc[((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day))]
 Y_1_month_data = raw_data22.loc[((raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day))]
-M_1_data = raw_data23.loc[((raw_data23['Month'] == selected_type.month-1) & (raw_data23['Date'] <= selected_type.day))]
+if(selected_type.month == 1):
+    M_1_data = raw_data22.loc[((raw_data22['Month'] == 12) & (raw_data22['Date'] <= selected_type.day))]
+else:
+    M_1_data = raw_data23.loc[((raw_data23['Month'] == selected_type.month-1) & (raw_data23['Date'] <= selected_type.day))]
 
 trend_daily_rev = (current_month_data.groupby(['Date'])['Rev_sum'].sum()).to_frame().reset_index()
 trend_daily_rev.columns = ['Date', 'Actual']
@@ -147,7 +153,13 @@ if(not today_r4_data.empty):
     top_5_m = top_5.copy()
 
     # ----------------------------------------------------- TABLE TOP 5 M-1 ------------------------------------------------------
-    l4_this_month_1_data = raw_l4.loc[(raw_l4['Month'] == selected_type.month-1) & (raw_l4['Day'] <= selected_type.day) & (raw_l4['Service'].isin(top_5['Service']))]
+    if(selected_type.month == 1):
+        regex_dec_month_2022 = regexFromDate2022OneMonth(selected_type.day, 12)
+        l4_2022_dec = raw_l4_2022[raw_l4_2022.Date.str.contains(regex_dec_month_2022, regex=True, na=False)]
+        l4_this_month_1_data = l4_2022_dec.loc[(l4_2022_dec['Service'].isin(top_5['Service']))]
+    else:
+        l4_this_month_1_data = raw_l4.loc[(raw_l4['Month'] == selected_type.month-1) & (raw_l4['Day'] <= selected_type.day) & (raw_l4['Service'].isin(top_5['Service']))]
+
     top_5_M_1 = (l4_this_month_1_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
     top_5_M_1.columns = ['Service', 'M-1']
     top_5 = pd.merge(top_5, top_5_M_1, on='Service')

@@ -100,9 +100,10 @@ def regexFromDate2022(day, month):
         else:
             months = month - 1 - 12
             regex2 = f'(?:0[1-9]|1[0-9]|2[0-9]|3[0-1])/(?:0[1-9]|1[{months}])/2022'
-
-    final_regex = '(' + regex1 + ')' + '|' + '(' + regex2 + ')'
-    return final_regex
+        final_regex = '(' + regex1 + ')' + '|' + '(' + regex2 + ')'
+        return final_regex
+    else:
+        return regex1
 
 def regexFromDate2022OneMonth(day, month):
     if (day < 10):
