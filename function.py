@@ -44,7 +44,7 @@ def load_data():
     table_rows = db_cursor.fetchall()
     rgb_all = pd.DataFrame(table_rows)
 
-    db_cursor.execute('SELECT service, rev_sum, month, day FROM l4 WHERE regional="EASTERN JABOTABEK"')
+    db_cursor.execute('SELECT service, rev_sum, month, day, divisi FROM l4 WHERE regional="EASTERN JABOTABEK"')
     table_rows = db_cursor.fetchall()
     l4 = pd.DataFrame(table_rows)
 
