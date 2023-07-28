@@ -10,6 +10,7 @@ import warnings
 # ----------------------------------------------------------- CONST ----------------------------------------------------------
 PIE_COLOR = px.colors.sequential.Burgyl
 TARGET_REVENUE_EASTERN = 46671504423.89
+TARGET_REVENUE_DAILY_EASTERN = 1555716814.13
 
 IMAGE_DOWN = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
 IMAGE_UP = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8')

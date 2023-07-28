@@ -141,10 +141,6 @@ clusterChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percen
 
 
 # ------------------------------------------------------------ RGB -----------------------------------------------------------
-last_month_date = datetime.datetime(selected_type.year, selected_type.month-1, selected_type.day)
-today_date = selected_type.strftime("%d/%m/%Y")
-last_month = last_month_date.strftime("%d/%m/%Y")
-
 raw_rgb_service = raw_rgb_all.loc[(raw_rgb_all['Divisi'] == service_name)]
 rgbbb = (raw_rgb_service.groupby(['Date'])['Subs'].sum()).to_frame().reset_index().sort_values('Date', ascending=False)
 rgbM = rgbbb.take([0])
@@ -259,7 +255,7 @@ def createServiceUI():
     with col3:
         col3a, col3b, col3c = st.columns(3)
         col3d, col3e, col3f = st.columns(3)
-        col3g, col3h, col3i = st.columns(3)
+        # col3g, col3h, col3i = st.columns(3)
         col3j, col3k, col3l = st.columns(3)
 
         with col3a:
@@ -286,12 +282,12 @@ def createServiceUI():
                 st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{IMAGE_DOWN}" width="21" height="21"/> </div>', unsafe_allow_html=True)
             else:
                 st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{IMAGE_UP}" width="21" height="21"/> </div>', unsafe_allow_html=True)
-        with col3g:
-            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div> ', unsafe_allow_html=True)
-        with col3h:
-            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
-        with col3i:
-            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
+        # with col3g:
+        #     st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div> ', unsafe_allow_html=True)
+        # with col3h:
+        #     st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
+        # with col3i:
+        #     st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
         with col3j:
             st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM_gap} </div> ', unsafe_allow_html=True)
         with col3k:
@@ -369,7 +365,7 @@ def createServiceUI():
         st.plotly_chart(clusterChart, use_container_width=True)
 
     with col9:
-        st.subheader("Top 5 L4 Contributor")
+        st.subheader(f"Top 5 {service_name} L4 Contributor")
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
         if(today_r4_data.empty):
             st.write("Data not updated until selected date")

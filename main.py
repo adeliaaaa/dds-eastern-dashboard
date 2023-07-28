@@ -5,7 +5,7 @@ import plotly.express as px
 
 import plotly.graph_objects as go
 
-from function import regexFromDate2022, regexFromDate2022OneMonth, color_negative_to_red, PIE_COLOR, load_data, addCustomStyle, TARGET_REVENUE_EASTERN, IMAGE_DOWN, IMAGE_UP
+from function import regexFromDate2022, regexFromDate2022OneMonth, color_negative_to_red, PIE_COLOR, load_data, addCustomStyle, TARGET_REVENUE_EASTERN, IMAGE_DOWN, IMAGE_UP, TARGET_REVENUE_DAILY_EASTERN
 from numerize import numerize
 
 st.set_page_config(layout="wide")
@@ -52,7 +52,8 @@ total_rev_number_M = raw_data23.loc[(raw_data23['Month'] == selected_type.month)
 total_rev_number_M_1 = raw_data23.loc[(raw_data23['Month'] == (selected_type.month - 1)) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
 
 # -------------------------------------------------------- DAILY REV ---------------------------------------------------------
-daily_rev = numerize.numerize(total_rev_number_M / selected_type.day)
+daily_rev = total_rev_number_M / selected_type.day
+daily_rev_gap = numerize.numerize(float(daily_rev - TARGET_REVENUE_DAILY_EASTERN))
 
 # ------------------------------------------------------ REV TO TARGET -------------------------------------------------------
 rev_to_target_number = float(total_rev_number_M) / TARGET_REVENUE_EASTERN * 100
@@ -129,10 +130,6 @@ clusterChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percen
 
 
 # ------------------------------------------------------------ RGB -----------------------------------------------------------
-last_month_date = datetime.datetime(selected_type.year, selected_type.month-1, selected_type.day)
-today_date = selected_type.strftime("%d/%m/%Y")
-last_month = last_month_date.strftime("%d/%m/%Y")
-
 rgbbb = (raw_rgb_all.groupby(['Date'])['Subs'].sum()).to_frame().reset_index().sort_values('Date', ascending=False)
 rgbM = rgbbb.take([0])
 rgbM_1 = rgbbb.take([1])
@@ -241,14 +238,14 @@ def createUI():
             st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {numerize.numerize(float(total_rev_number_M))} </div>', unsafe_allow_html=True)
             
         with col2d:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {daily_rev} </div>', unsafe_allow_html=True)
+            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw; flex-direction: column; align-items: center;"> {numerize.numerize(float(daily_rev))} <div>{daily_rev_gap}</div></div>', unsafe_allow_html=True)
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 
     with col3:
         col3a, col3b, col3c = st.columns(3)
         col3d, col3e, col3f = st.columns(3)
-        col3g, col3h, col3i = st.columns(3)
+        # col3g, col3h, col3i = st.columns(3)
         col3j, col3k, col3l = st.columns(3)
 
         with col3a:
@@ -275,12 +272,12 @@ def createUI():
                 st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{IMAGE_DOWN}" width="21" height="21"/> </div>', unsafe_allow_html=True)
             else:
                 st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY}% <img src="data:image/png;base64,{IMAGE_UP}" width="21" height="21"/> </div>', unsafe_allow_html=True)
-        with col3g:
-            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div> ', unsafe_allow_html=True)
-        with col3h:
-            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
-        with col3i:
-            st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
+        # with col3g:
+        #     st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div> ', unsafe_allow_html=True)
+        # with col3h:
+        #     st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
+        # with col3i:
+        #     st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
         with col3j:
             st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM_gap} </div> ', unsafe_allow_html=True)
         with col3k:
