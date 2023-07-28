@@ -14,7 +14,7 @@ st.set_page_config(layout="wide")
 addCustomStyle()
 
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
-max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data = load_data()
+max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data = load_data('All')
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_rgb_all.columns = ['Date', 'Subs']

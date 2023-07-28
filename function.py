@@ -16,7 +16,7 @@ IMAGE_UP = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8'
 
 # --------------------------------------------------------- DATABASE ---------------------------------------------------------
 @st.cache_data
-def load_data():
+def load_data(type):
     connection = MySQLdb.connect(
         host= 'localhost',
         user='root',
@@ -40,9 +40,14 @@ def load_data():
     max_date_data = pd.DataFrame(table_rows)
     max_date_data = datetime.datetime.strptime(max_date_data[0][0], "%d/%m/%Y")
 
-    db_cursor.execute('SELECT bulan, subs FROM rgb_all WHERE reg="06.Eastern Jabotabek"')
-    table_rows = db_cursor.fetchall()
-    rgb_all = pd.DataFrame(table_rows)
+    if(type == 'All'):
+        db_cursor.execute('SELECT bulan, subs FROM rgb_all WHERE reg="06.Eastern Jabotabek"')
+        table_rows = db_cursor.fetchall()
+        rgb_all = pd.DataFrame(table_rows)
+    else:
+        db_cursor.execute('SELECT bulan, subs, divisi FROM rgb_service WHERE reg="06.Eastern Jabotabek"')
+        table_rows = db_cursor.fetchall()
+        rgb_all = pd.DataFrame(table_rows)
 
     db_cursor.execute('SELECT service, rev_sum, month, day, divisi FROM l4 WHERE regional="EASTERN JABOTABEK"')
     table_rows = db_cursor.fetchall()

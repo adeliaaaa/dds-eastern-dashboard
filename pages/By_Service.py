@@ -14,10 +14,10 @@ st.set_page_config(layout="wide")
 addCustomStyle()
 
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
-max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data = load_data()
+max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data = load_data('Service')
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
-raw_rgb_all.columns = ['Date', 'Subs']
+raw_rgb_all.columns = ['Date', 'Subs', 'Divisi']
 raw_l4.columns = ['Service', 'Rev_sum', 'Month', 'Day', 'Divisi']
 raw_l4_2022.columns = ['Date', 'Service', 'Rev_sum']
 raw_outlet.columns = ['Cluster', 'Outlet Register']
@@ -145,7 +145,8 @@ last_month_date = datetime.datetime(selected_type.year, selected_type.month-1, s
 today_date = selected_type.strftime("%d/%m/%Y")
 last_month = last_month_date.strftime("%d/%m/%Y")
 
-rgbbb = (raw_rgb_all.groupby(['Date'])['Subs'].sum()).to_frame().reset_index().sort_values('Date', ascending=False)
+raw_rgb_service = raw_rgb_all.loc[(raw_rgb_all['Divisi'] == service_name)]
+rgbbb = (raw_rgb_service.groupby(['Date'])['Subs'].sum()).to_frame().reset_index().sort_values('Date', ascending=False)
 rgbM = rgbbb.take([0])
 rgbM_1 = rgbbb.take([1])
 
