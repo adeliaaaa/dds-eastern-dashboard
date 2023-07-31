@@ -132,7 +132,7 @@ clusterChart = px.pie(rev_cluster, values='Rev_sum', names=rev_cluster.index, co
 clusterChart.update_layout(
     showlegend=False
 )
-clusterChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percent})", rotation=40, textfont_size=14)
+clusterChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percent})", rotation=30, textfont_size=14)
 
 
 # ------------------------------------------------------------ RGB -----------------------------------------------------------
@@ -212,7 +212,9 @@ outlet = pd.merge(outlet, outlet_data, on='Cluster')
 outlet['%'] = (outlet['Outlet'] / outlet['Outlet Register']) * 100
 outlet = outlet.drop(['Outlet Register'], axis=1)
 outlet['Outlet'] = outlet['Outlet'].astype('str')
+outlet['Rev_sum'] = outlet['Rev_sum'].apply(lambda x: "{:.2f}".format(x/1000000)).astype('str')
 outlet['%'] = outlet['%'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
+outlet.columns = ['Cluster', 'Outlet', 'Rev(M)', '%']
 
 outlet = outlet.set_index('Cluster')
 
@@ -360,7 +362,7 @@ def createUI():
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
         st.plotly_chart(serviceChart, use_container_width=True)
 
-    col8, col9, col10 = st.columns([4,4,3])
+    col8, col9, col10 = st.columns([11,12,9])
     with col8:
         st.subheader("By Cluster")
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
@@ -377,6 +379,6 @@ def createUI():
     with col10:
         st.subheader("Outlet Digital Aktif & Rev")
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
-        st.dataframe(outlet, use_container_width=True)
+        st.dataframe(outlet, use_container_width=True, column_order=['Outlet', '%', 'Rev(M)'])
 
 createUI()
