@@ -70,8 +70,10 @@ def load_data(type):
 
 # ---------------------------------------------------------- HELPER ----------------------------------------------------------
 def color_negative_to_red(val):
-    color = 'red' if val[0] == '-' else 'black'
-    return 'color: %s' % color
+    if(val[0] == '-'):
+        color = 'red'
+        return 'color: %s' % color
+    # color = 'red' if val[0] == '-' else 'black'
 
 def regexFromDate2022(day, month):
     if (day < 10):
