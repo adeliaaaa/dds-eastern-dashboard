@@ -5,7 +5,8 @@ import streamlit as st
 import datetime
 import base64
 import warnings
-
+from dotenv import load_dotenv
+import os
 
 # ----------------------------------------------------------- CONST ----------------------------------------------------------
 PIE_COLOR = px.colors.sequential.Burgyl
@@ -18,11 +19,18 @@ IMAGE_UP = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8'
 # --------------------------------------------------------- DATABASE ---------------------------------------------------------
 @st.cache_data
 def load_data(type):
+    load_dotenv()
+
+    HOST_ = os.getenv('HOST_')
+    USERNAME_ = os.getenv('USERNAME_')
+    PASSWORD_ = os.getenv('PASSWORD_')
+    DATABASE_ = os.getenv('DATABASE_')
+
     connection = MySQLdb.connect(
-        host= 'localhost',
-        user='root',
-        passwd= '',
-        db= 'ddseastern',
+        host= HOST_,
+        user= USERNAME_,
+        passwd= PASSWORD_,
+        db= DATABASE_,
         autocommit = True
     )
 
