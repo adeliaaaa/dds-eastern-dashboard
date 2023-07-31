@@ -130,7 +130,7 @@ serviceChart = px.pie(rev_service, values='Rev_sum', names=rev_service.index, co
 
 serviceChart.update_layout(showlegend=False)
 
-serviceChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percent})", rotation=15, textfont_size=14)
+serviceChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percent})", textfont_size=14)
 
 # ----------------------------------------------------- PIE CHART CLUSTER ----------------------------------------------------
 rev_cluster = (current_month_data.groupby(['Cluster'])['Rev_sum'].sum()).to_frame().reset_index()
@@ -143,7 +143,7 @@ clusterChart = px.pie(rev_cluster, values='Rev_sum', names=rev_cluster.index, co
 clusterChart.update_layout(
     showlegend=False
 )
-clusterChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percent})", rotation=45, textfont_size=14)
+clusterChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percent})", rotation=40, textfont_size=14)
 
 
 # ------------------------------------------------------------ RGB -----------------------------------------------------------
@@ -232,20 +232,20 @@ def createServiceUI():
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
         with st.container():
             st.write(f'<div style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE TO TARGET </div>', unsafe_allow_html=True)
-            col1a, col1b = st.columns([4,3])
+            col1a, col1b = st.columns([4,4])
             
             with col1a:
                 st.progress(int(rev_to_target_number))
             with col1b:
                 st.write(f"{numerize.numerize(rev_to_target_number)}%, {rev_to_target_gap}")
 
-        with st.container():
-            st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
-            col1a, col1b = st.columns([4,3])
-            with col1a:
-                st.progress(45)
-            with col1b:
-                st.write("45%")
+        # with st.container():
+        #     st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
+        #     col1a, col1b = st.columns([4,3])
+        #     with col1a:
+        #         st.progress(45)
+        #     with col1b:
+        #         st.write("45%")
             
     with col2:
         col2a, col2b = st.columns(2)
