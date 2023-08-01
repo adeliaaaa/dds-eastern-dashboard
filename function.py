@@ -1,10 +1,10 @@
 import plotly.express as px
 import pandas as pd
-import MySQLdb
 import streamlit as st
 import datetime
 import base64
 import warnings
+import mysql.connector
 
 # ----------------------------------------------------------- CONST ----------------------------------------------------------
 PIE_COLOR = px.colors.sequential.Burgyl
@@ -18,15 +18,14 @@ IMAGE_UP = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8'
 @st.cache_data
 def load_data(type):
 
-    connection = MySQLdb.connect(
+    connection = mysql.connector.connect(
         host= st.secrets["HOST_DB"],
         user= st.secrets["USERNAME_DB"],
         passwd= st.secrets["PASSWORD_DB"],
         db= st.secrets["DATABASE_DB"],
         autocommit = True,
-        ssl      = {
-            "ca": ".\cacert.pem"
-        }
+        ssl_ca      =".\cacert.pem"
+
     )
 
     db_cursor = connection.cursor()
