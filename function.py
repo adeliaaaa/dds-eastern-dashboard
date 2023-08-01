@@ -31,11 +31,14 @@ def load_data(type):
         user= USERNAME_DB,
         passwd= PASSWORD_DB,
         db= DATABASE_DB,
-        autocommit = True
+        autocommit = True,
+        ssl      = {
+            "ca": "C:\Kuliah\Akademik\cacert.pem"
+        }
     )
 
     db_cursor = connection.cursor()
-    # db_cursor.execute('SET workload = OLAP')
+    db_cursor.execute('SET workload = OLAP')
     db_cursor.execute('SELECT rev_date, cluster, rev_sum, month, date, divisi FROM digital_2022 WHERE reg = "EASTERN JABOTABEK"')
     table_rows = db_cursor.fetchall()
     raw_data22 = pd.DataFrame(table_rows)
@@ -44,7 +47,7 @@ def load_data(type):
     table_rows = db_cursor.fetchall()
     raw_data23 = pd.DataFrame(table_rows)
 
-    db_cursor.execute('select rev_date from digital_2023 order by CAST(month AS int) desc, CAST(date AS int) desc limit 1')
+    db_cursor.execute('select rev_date from digital_2023 order by ABS(month) desc, ABS(date) desc limit 1')
     table_rows = db_cursor.fetchall()
     max_date_data = pd.DataFrame(table_rows)
     max_date_data = datetime.datetime.strptime(max_date_data[0][0], "%d/%m/%Y")
