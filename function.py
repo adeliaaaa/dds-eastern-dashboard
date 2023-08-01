@@ -5,8 +5,6 @@ import streamlit as st
 import datetime
 import base64
 import warnings
-from dotenv import load_dotenv
-import os
 
 # ----------------------------------------------------------- CONST ----------------------------------------------------------
 PIE_COLOR = px.colors.sequential.Burgyl
@@ -19,26 +17,20 @@ IMAGE_UP = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8'
 # --------------------------------------------------------- DATABASE ---------------------------------------------------------
 @st.cache_data
 def load_data(type):
-    load_dotenv()
-
-    HOST_DB = os.getenv('HOST_DB')
-    USERNAME_DB = os.getenv('USERNAME_DB')
-    PASSWORD_DB = os.getenv('PASSWORD_DB')
-    DATABASE_DB = os.getenv('DATABASE_DB')
 
     connection = MySQLdb.connect(
-        host= HOST_DB,
-        user= USERNAME_DB,
-        passwd= PASSWORD_DB,
-        db= DATABASE_DB,
+        host= st.secrets["HOST_DB"],
+        user= st.secrets["USERNAME_DB"],
+        passwd= st.secrets["PASSWORD_DB"],
+        db= st.secrets["DATABASE_DB"],
         autocommit = True,
         ssl      = {
-            "ca": "C:\Kuliah\Akademik\cacert.pem"
+            "ca": ".\cacert.pem"
         }
     )
 
     db_cursor = connection.cursor()
-    db_cursor.execute('SET workload = OLAP')
+    # db_cursor.execute('SET workload = OLAP')
     db_cursor.execute('SELECT rev_date, cluster, rev_sum, month, date, divisi FROM digital_2022 WHERE reg = "EASTERN JABOTABEK"')
     table_rows = db_cursor.fetchall()
     raw_data22 = pd.DataFrame(table_rows)
