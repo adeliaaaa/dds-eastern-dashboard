@@ -24,7 +24,7 @@ def load_data(type):
         passwd= st.secrets["PASSWORD_DB"],
         db= st.secrets["DATABASE_DB"],
         autocommit = True,
-        ssl_ca      =".\cacert.pem"
+        ssl_ca      ="cacert.pem"
 
     )
 
