@@ -21,16 +21,16 @@ IMAGE_UP = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8'
 def load_data(type):
     load_dotenv()
 
-    HOST_ = os.getenv('HOST_')
-    USERNAME_ = os.getenv('USERNAME_')
-    PASSWORD_ = os.getenv('PASSWORD_')
-    DATABASE_ = os.getenv('DATABASE_')
+    HOST_DB = os.getenv('HOST_DB')
+    USERNAME_DB = os.getenv('USERNAME_DB')
+    PASSWORD_DB = os.getenv('PASSWORD_DB')
+    DATABASE_DB = os.getenv('DATABASE_DB')
 
     connection = MySQLdb.connect(
-        host= HOST_,
-        user= USERNAME_,
-        passwd= PASSWORD_,
-        db= DATABASE_,
+        host= HOST_DB,
+        user= USERNAME_DB,
+        passwd= PASSWORD_DB,
+        db= DATABASE_DB,
         autocommit = True
     )
 
