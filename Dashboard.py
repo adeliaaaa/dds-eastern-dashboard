@@ -309,6 +309,7 @@ def createUI():
     with col4:
         col4a, col4b = st.columns(2)
         col4c, col4d = st.columns(2)
+        col4e, col4f = st.columns(2)
 
         with col4a:
             st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> RGB </div>', unsafe_allow_html=True)
@@ -326,6 +327,8 @@ def createUI():
             else:
                 st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{IMAGE_UP}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
         
+        with col4f:
+            st.write(f'<hr class="solid"> <div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center;  font-size:1.5vw;"> {numerize.numerize(float(rgbM.iloc[0]["Subs"] - rgbM_1.iloc[0]["Subs"]))} </div>', unsafe_allow_html=True)
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)        
 
     col6, col7 = st.columns([6,3])

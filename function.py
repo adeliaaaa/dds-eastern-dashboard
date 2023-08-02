@@ -163,6 +163,10 @@ def addCustomStyle():
             height: 10px;
         }
 
+        .stProgress .st-bo {
+            background-color: #3f81da;
+        }
+
         .stDateInput label{
             display:none;
         }
