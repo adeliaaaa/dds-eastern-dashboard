@@ -105,8 +105,8 @@ trend_daily_rev_M_1 = (M_1_data.groupby(['Date'])['Rev_sum'].sum()).to_frame().r
 trend_daily_rev_Y_1 = (Y_1_month_data.groupby(['Date'])['Rev_sum'].sum()).to_frame().reset_index()
 
 trend_daily_rev = trend_daily_rev.set_index('Date')
-trend_daily_rev_M_1 = trend_daily_rev_M_1.set_index('Date')
-trend_daily_rev_Y_1 = trend_daily_rev_Y_1.set_index('Date')
+# trend_daily_rev_M_1 = trend_daily_rev_M_1.set_index('Date')
+# trend_daily_rev_Y_1 = trend_daily_rev_Y_1.set_index('Date')
 
 # ---------------------------------------------------- PIE CHART SERVICE -----------------------------------------------------
 rev_service = (current_month_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index()
@@ -211,12 +211,15 @@ outlet = raw_outlet.set_index('Cluster')
 outlet = pd.merge(outlet, outlet_data, on='Cluster')
 outlet['%'] = (outlet['Outlet'] / outlet['Outlet Register']) * 100
 outlet = outlet.drop(['Outlet Register'], axis=1)
+
+outlet = outlet.set_index('Cluster')
+outlet.loc['EASTERN JABOTABEK']= outlet.sum(numeric_only=True)
+
 outlet['Outlet'] = outlet['Outlet'].astype('str')
 outlet['Rev_sum'] = outlet['Rev_sum'].apply(lambda x: "{:.2f}".format(x/1000000)).astype('str')
 outlet['%'] = outlet['%'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
-outlet.columns = ['Cluster', 'Outlet', 'Rev(M)', '%']
 
-outlet = outlet.set_index('Cluster')
+outlet.columns = ['Outlet', 'Rev(M)', '%']
 
 # ---------------------------------------------------------- DESIGN ----------------------------------------------------------
 def createUI():
@@ -350,9 +353,10 @@ def createUI():
                 y = -0.2,
                 entrywidth=40
             ))
-            lchart.add_traces(go.Scatter(x=trend_daily_rev_M_1.index, y=trend_daily_rev_M_1['Rev_sum'], name='M-1', line_shape="spline", mode='markers+lines'))
-            lchart.add_traces(go.Scatter(x=trend_daily_rev_Y_1.index, y=trend_daily_rev_Y_1['Rev_sum'], name='Y-1', line_shape="spline", mode='markers+lines'))
+            lchart.add_traces(go.Scatter(x=trend_daily_rev_M_1['Date'], y=trend_daily_rev_M_1['Rev_sum'], name='M-1', line_shape="spline", mode='markers+lines'))
+            lchart.add_traces(go.Scatter(x=trend_daily_rev_Y_1['Date'], y=trend_daily_rev_Y_1['Rev_sum'], name='Y-1', line_shape="spline", mode='markers+lines'))
             lchart.update_xaxes(dtick=1)
+            lchart.update_traces(hovertemplate='Date: %{x}'+'<br>Rev: %{y}')
             lchart
         else:
             lchart = px.line(trend_monthly, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly, markers=True)
@@ -363,6 +367,7 @@ def createUI():
                 y = -0.2,
                 entrywidth=40
             ))
+            lchart.update_traces(hovertemplate='Month: %{x}'+'<br>Rev: %{y}')
             lchart
 
     with col7:

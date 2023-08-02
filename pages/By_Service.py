@@ -220,12 +220,15 @@ outlet = raw_outlet.set_index('Cluster')
 outlet = pd.merge(outlet, outlet_data, on='Cluster')
 outlet['%'] = (outlet['Outlet'] / outlet['Outlet Register']) * 100
 outlet = outlet.drop(['Outlet Register'], axis=1)
+
+outlet = outlet.set_index('Cluster')
+outlet.loc['EASTERN JABOTABEK']= outlet.sum(numeric_only=True)
+
 outlet['Outlet'] = outlet['Outlet'].astype('str')
 outlet['Rev_sum'] = outlet['Rev_sum'].apply(lambda x: "{:.2f}".format(x/1000000)).astype('str')
 outlet['%'] = outlet['%'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
-outlet.columns = ['Cluster', 'Outlet', 'Rev(M)', '%']
 
-outlet = outlet.set_index('Cluster')
+outlet.columns = ['Outlet', 'Rev(M)', '%']
 
 # ---------------------------------------------------------- DESIGN ----------------------------------------------------------
 def createServiceUI():
@@ -358,6 +361,7 @@ def createServiceUI():
             lchart.add_traces(go.Scatter(x=trend_daily_rev_M_1.index, y=trend_daily_rev_M_1['Rev_sum'], name='M-1', line_shape="spline", mode='markers+lines'))
             lchart.add_traces(go.Scatter(x=trend_daily_rev_Y_1.index, y=trend_daily_rev_Y_1['Rev_sum'], name='Y-1', line_shape="spline", mode='markers+lines'))
             lchart.update_xaxes(dtick=1)
+            lchart.update_traces(hovertemplate='Date: %{x}'+'<br>Rev: %{y}')
             lchart
         else:
             lchart = px.line(trend_monthly, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly, markers=True)
@@ -368,6 +372,7 @@ def createServiceUI():
                 y = -0.2,
                 entrywidth=40
             ))
+            lchart.update_traces(hovertemplate='Month: %{x}'+'<br>Rev: %{y}')
             lchart
 
     with col7:
