@@ -14,6 +14,7 @@ st.set_page_config(layout="wide")
 addCustomStyle()
 
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
+# max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data, eastern_jabotabek_all_revenue = load_data('All')
 max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data = load_data('All')
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
@@ -22,6 +23,15 @@ raw_l4.columns = ['Service', 'Rev_sum', 'Month', 'Day', 'Divisi']
 raw_l4_2022.columns = ['Date', 'Service', 'Rev_sum']
 raw_outlet.columns = ['Cluster', 'Outlet Register']
 outlet_data.columns = ['Cluster', 'Outlet', 'Rev_sum']
+# eastern_jabotabek_all_revenue.columns = ['Keterangan', 'Value']
+# eastern_jabotabek_all_revenue
+# all_rev_eastern = eastern_jabotabek_all_revenue.loc[eastern_jabotabek_all_revenue['Keterangan'] == 'all revenue', 'Value'].iloc[0]
+# all_rev_eastern
+# target_revenue_eastern = eastern_jabotabek_all_revenue.loc[eastern_jabotabek_all_revenue['Keterangan'] == 'target revenue eastern', 'Value'].iloc[0]
+# target_revenue_eastern
+# target_revenue_daily_eastern = eastern_jabotabek_all_revenue.loc[eastern_jabotabek_all_revenue['Keterangan'] == 'target revenue daily eastern', 'Value'].iloc[0]
+# target_revenue_daily_eastern
+
 raw_data23['Month'] = raw_data23['Month'].astype('int')
 raw_data22['Month'] = raw_data22['Month'].astype('int')
 raw_l4['Month'] = raw_l4['Month'].astype('int')
@@ -56,9 +66,12 @@ else:
 
 # -------------------------------------------------------- DAILY REV ---------------------------------------------------------
 daily_rev = total_rev_number_M / selected_type.day
+# daily_rev_gap = numerize.numerize(float(daily_rev - target_revenue_daily_eastern))
 daily_rev_gap = numerize.numerize(float(daily_rev - TARGET_REVENUE_DAILY_EASTERN))
 
 # ------------------------------------------------------ REV TO TARGET -------------------------------------------------------
+# rev_to_target_number = float(total_rev_number_M) / target_revenue_eastern * 100
+# rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - target_revenue_eastern)
 rev_to_target_number = float(total_rev_number_M) / TARGET_REVENUE_EASTERN * 100
 rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - TARGET_REVENUE_EASTERN)
 
@@ -237,11 +250,13 @@ def createUI():
 
         # with st.container():
         #     st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
+        #     rev_contribution = int(float(total_rev_number_M) / float(all_rev_eastern) * 100)
+            
         #     col1a, col1b = st.columns([4,3])
         #     with col1a:
-        #         st.progress(45)
+        #         st.progress(rev_contribution)
         #     with col1b:
-        #         st.write("45%")
+        #         st.write(f"{rev_contribution}%")
             
     with col2:
         col2a, col2b = st.columns(2)

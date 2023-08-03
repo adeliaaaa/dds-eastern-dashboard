@@ -14,6 +14,7 @@ st.set_page_config(layout="wide")
 addCustomStyle()
 
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
+# max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data, eastern_jabotabek_all_revenue = load_data('Service')
 max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data = load_data('Service')
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
@@ -257,13 +258,14 @@ def createServiceUI():
             with col1b:
                 st.write(f"{numerize.numerize(rev_to_target_number)}%, {rev_to_target_gap}")
 
-        # with st.container():
-        #     st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
-        #     col1a, col1b = st.columns([4,3])
-        #     with col1a:
-        #         st.progress(45)
-        #     with col1b:
-        #         st.write("45%")
+        with st.container():
+            st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> {service_name} Contribution </div>', unsafe_allow_html=True)
+            col1a, col1b = st.columns([4,4])
+            rev_contribution = int(total_rev_number_M / total_rev_box * 100)
+            with col1a:
+                st.progress(rev_contribution)
+            with col1b:
+                st.write(f"{rev_contribution}%")
             
     with col2:
         col2a, col2b = st.columns(2)

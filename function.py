@@ -68,6 +68,11 @@ def load_data(type):
     table_rows = db_cursor.fetchall()
     outlet_data = pd.DataFrame(table_rows)
 
+    # db_cursor.execute("SELECT * FROM const_data;")
+    # table_rows = db_cursor.fetchall()
+    # eastern_jabotabek_all_revenue = pd.DataFrame(table_rows)
+
+    # return max_date_data, raw_data22, raw_data23, rgb_all, l4, l4_2022, raw_outlet, outlet_data, eastern_jabotabek_all_revenue
     return max_date_data, raw_data22, raw_data23, rgb_all, l4, l4_2022, raw_outlet, outlet_data
 
 # ---------------------------------------------------------- HELPER ----------------------------------------------------------
