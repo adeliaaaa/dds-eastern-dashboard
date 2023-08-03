@@ -14,6 +14,7 @@ st.set_page_config(layout="wide")
 addCustomStyle()
 
 # ------------------------------------------------ COLLECT & PREPARATION DATA ------------------------------------------------
+# max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data, eastern_jabotabek_all_revenue = load_data('Service')
 max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data = load_data('Service')
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
@@ -118,20 +119,6 @@ trend_daily_rev = trend_daily_rev.set_index('Date')
 trend_daily_rev_M_1 = trend_daily_rev_M_1.set_index('Date')
 trend_daily_rev_Y_1 = trend_daily_rev_Y_1.set_index('Date')
 
-# ---------------------------------------------------- PIE CHART SERVICE -----------------------------------------------------
-current_month_data_all = raw_data23.loc[((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day))]
-rev_service = (current_month_data_all.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index()
-rev_service = rev_service.set_index('Service')
-
-rev_service = rev_service[(rev_service.index == 'Digital Banking') | (rev_service.index == 'Digital Music')| (rev_service.index == 'Games Marketplace') | (rev_service.index == 'VAS Content') | (rev_service.index == 'Video')]
-rev_service['Rev_sum'] = rev_service['Rev_sum'].apply(lambda x: "{:.2f}".format(x/1000000000))
-
-serviceChart = px.pie(rev_service, values='Rev_sum', names=rev_service.index, color_discrete_sequence= PIE_COLOR)
-
-serviceChart.update_layout(showlegend=False)
-
-serviceChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percent})", textfont_size=14)
-
 # ----------------------------------------------------- PIE CHART CLUSTER ----------------------------------------------------
 rev_cluster = (current_month_data.groupby(['Cluster'])['Rev_sum'].sum()).to_frame().reset_index()
 rev_cluster = rev_cluster.set_index('Cluster')
@@ -156,6 +143,33 @@ rgbM_1 = rgbbb.take([1])
 today_r4_data = raw_l4.loc[((raw_l4['Month'] == selected_type.month) & (raw_l4['Day'] == selected_type.day))]
 
 if(not today_r4_data.empty):
+    # ---------------------------------------------------- PIE CHART SERVICE -----------------------------------------------------
+    service_this_month_data = raw_l4.loc[((raw_l4['Divisi'] == service_name) & (raw_l4['Month'] == selected_type.month) & (raw_l4['Day'] <= selected_type.day))]
+    rev_service = (service_this_month_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
+    # rev_service = (service_this_month_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
+    # current_month_data_all = raw_data23.loc[((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day))]
+    # rev_service = (current_month_data_all.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index()
+
+    rev_service = rev_service.set_index('Service')
+    rev_service_top5 = rev_service.iloc[:5]
+    
+    rev_service = rev_service_top5
+
+    # rev_service = rev_service[(rev_service.index == 'Digital Banking') | (rev_service.index == 'Digital Music')| (rev_service.index == 'Games Marketplace') | (rev_service.index == 'VAS Content') | (rev_service.index == 'Video')]
+    rev_service['Rev_sum'] = rev_service['Rev_sum'].apply(lambda x: "{:.2f}".format(x/1000000000))
+
+    serviceChart = px.pie(rev_service, values='Rev_sum', names=rev_service.index, color_discrete_sequence= PIE_COLOR)
+
+    serviceChart.update_layout(showlegend=False)
+
+    serviceChart.update_traces(
+        texttemplate = "%{label} <br> %{value}B <br>(%{percent})"
+        # textfont_size=14,
+        # textposition='inside',
+        # textposition = ifelse(df$freq<5,"outside","inside"),
+        # insidetextorientation='horizontal'
+        )
+
     # ------------------------------------------------------ TABLE TOP 5 M -------------------------------------------------------
     l4_this_month_data = raw_l4.loc[((raw_l4['Divisi'] == service_name) & (raw_l4['Month'] == selected_type.month) & (raw_l4['Day'] <= selected_type.day))]
     top_5 = (l4_this_month_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
@@ -220,12 +234,15 @@ outlet = raw_outlet.set_index('Cluster')
 outlet = pd.merge(outlet, outlet_data, on='Cluster')
 outlet['%'] = (outlet['Outlet'] / outlet['Outlet Register']) * 100
 outlet = outlet.drop(['Outlet Register'], axis=1)
+
+outlet = outlet.set_index('Cluster')
+outlet.loc['EASTERN JABOTABEK']= outlet.sum(numeric_only=True)
+
 outlet['Outlet'] = outlet['Outlet'].astype('str')
 outlet['Rev_sum'] = outlet['Rev_sum'].apply(lambda x: "{:.2f}".format(x/1000000)).astype('str')
 outlet['%'] = outlet['%'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
-outlet.columns = ['Cluster', 'Outlet', 'Rev(M)', '%']
 
-outlet = outlet.set_index('Cluster')
+outlet.columns = ['Outlet', 'Rev(M)', '%']
 
 # ---------------------------------------------------------- DESIGN ----------------------------------------------------------
 def createServiceUI():
@@ -241,13 +258,14 @@ def createServiceUI():
             with col1b:
                 st.write(f"{numerize.numerize(rev_to_target_number)}%, {rev_to_target_gap}")
 
-        # with st.container():
-        #     st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> REVENUE CONTRIBUTION </div>', unsafe_allow_html=True)
-        #     col1a, col1b = st.columns([4,3])
-        #     with col1a:
-        #         st.progress(45)
-        #     with col1b:
-        #         st.write("45%")
+        with st.container():
+            st.write(f'<div class="PortMakers" style="font-weight: 600; display: flex; justify-content: flex-start; font-size:1.2vw;"> {service_name} Contribution </div>', unsafe_allow_html=True)
+            col1a, col1b = st.columns([4,4])
+            rev_contribution = int(total_rev_number_M / total_rev_box * 100)
+            with col1a:
+                st.progress(rev_contribution)
+            with col1b:
+                st.write(f"{rev_contribution}%")
             
     with col2:
         col2a, col2b = st.columns(2)
@@ -257,9 +275,9 @@ def createServiceUI():
             st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> TOTAL REV </div>', unsafe_allow_html=True)
         with col2b:
             st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> DAILY REV </div>', unsafe_allow_html=True)
+        
         with col2c:
             st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {numerize.numerize(float(total_rev_number_M))} </div>', unsafe_allow_html=True)
-            
         with col2d:
             st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; font-size:1.5vw;"> {daily_rev} </div>', unsafe_allow_html=True)
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
@@ -302,17 +320,18 @@ def createServiceUI():
         # with col3i:
         #     st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.15vw;"> Gap </div>', unsafe_allow_html=True)
         with col3j:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM_gap} </div> ', unsafe_allow_html=True)
+            st.write(f'<hr class="solid"> <div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {MoM_gap} </div> ', unsafe_allow_html=True)
         with col3k:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD_gap} </div>', unsafe_allow_html=True)
+            st.write(f'<hr class="solid"> <div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YtD_gap} </div>', unsafe_allow_html=True)
         with col3l:
-            st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY_gap} </div>', unsafe_allow_html=True)
+            st.write(f'<hr class="solid"> <div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {YoY_gap} </div>', unsafe_allow_html=True)
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
 
 
     with col4:
         col4a, col4b = st.columns(2)
         col4c, col4d = st.columns(2)
+        col4e, col4f = st.columns(2)
 
         with col4a:
             st.write(f'<div style="font-weight: 600; display: flex; justify-content: center; font-size:1.2vw;"> RGB </div>', unsafe_allow_html=True)
@@ -329,6 +348,9 @@ def createServiceUI():
                 st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{IMAGE_DOWN}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
             else:
                 st.write(f'<div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center; gap:5px;  font-size:1.5vw;"> {numerize.numerize(rgb_mtd)}% <img src="data:image/png;base64,{IMAGE_UP}" width="21" height="21"/> </div> ', unsafe_allow_html=True)
+        
+        with col4f:
+            st.write(f'<hr class="solid"> <div style="font-weight: 900; font-size: 22px; margin:0px; padding:0; display: flex; justify-content: center; align-items: center;  font-size:1.5vw;"> {numerize.numerize(float(rgbM.iloc[0]["Subs"] - rgbM_1.iloc[0]["Subs"]))} </div>', unsafe_allow_html=True)
         
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)        
 
@@ -354,6 +376,7 @@ def createServiceUI():
             lchart.add_traces(go.Scatter(x=trend_daily_rev_M_1.index, y=trend_daily_rev_M_1['Rev_sum'], name='M-1', line_shape="spline", mode='markers+lines'))
             lchart.add_traces(go.Scatter(x=trend_daily_rev_Y_1.index, y=trend_daily_rev_Y_1['Rev_sum'], name='Y-1', line_shape="spline", mode='markers+lines'))
             lchart.update_xaxes(dtick=1)
+            lchart.update_traces(hovertemplate='Date: %{x}'+'<br>Rev: %{y}')
             lchart
         else:
             lchart = px.line(trend_monthly, line_shape="spline", color_discrete_sequence= px.colors.qualitative.Plotly, markers=True)
@@ -364,12 +387,18 @@ def createServiceUI():
                 y = -0.2,
                 entrywidth=40
             ))
+            lchart.update_traces(hovertemplate='Month: %{x}'+'<br>Rev: %{y}')
             lchart
 
     with col7:
         st.subheader("By Service")
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
-        st.plotly_chart(serviceChart, use_container_width=True)
+        if(today_r4_data.empty):
+            st.write("Data not updated until selected date")
+        elif(l4_this_month_data.empty):
+            st.write("No data for selected service")
+        else:
+            st.plotly_chart(serviceChart, use_container_width=True)
 
     col8, col9, col10 = st.columns([11,12,9])
     with col8:
