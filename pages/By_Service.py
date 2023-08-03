@@ -163,8 +163,8 @@ if(not today_r4_data.empty):
     serviceChart.update_layout(showlegend=False)
 
     serviceChart.update_traces(
-        texttemplate = "%{label} <br> %{value}B <br>(%{percent})", 
-        textfont_size=14
+        texttemplate = "%{label} <br> %{value}B <br>(%{percent})"
+        # textfont_size=14,
         # textposition='inside',
         # textposition = ifelse(df$freq<5,"outside","inside"),
         # insidetextorientation='horizontal'
