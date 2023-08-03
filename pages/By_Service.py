@@ -118,20 +118,6 @@ trend_daily_rev = trend_daily_rev.set_index('Date')
 trend_daily_rev_M_1 = trend_daily_rev_M_1.set_index('Date')
 trend_daily_rev_Y_1 = trend_daily_rev_Y_1.set_index('Date')
 
-# ---------------------------------------------------- PIE CHART SERVICE -----------------------------------------------------
-current_month_data_all = raw_data23.loc[((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day))]
-rev_service = (current_month_data_all.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index()
-rev_service = rev_service.set_index('Service')
-
-rev_service = rev_service[(rev_service.index == 'Digital Banking') | (rev_service.index == 'Digital Music')| (rev_service.index == 'Games Marketplace') | (rev_service.index == 'VAS Content') | (rev_service.index == 'Video')]
-rev_service['Rev_sum'] = rev_service['Rev_sum'].apply(lambda x: "{:.2f}".format(x/1000000000))
-
-serviceChart = px.pie(rev_service, values='Rev_sum', names=rev_service.index, color_discrete_sequence= PIE_COLOR)
-
-serviceChart.update_layout(showlegend=False)
-
-serviceChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percent})", textfont_size=14)
-
 # ----------------------------------------------------- PIE CHART CLUSTER ----------------------------------------------------
 rev_cluster = (current_month_data.groupby(['Cluster'])['Rev_sum'].sum()).to_frame().reset_index()
 rev_cluster = rev_cluster.set_index('Cluster')
@@ -156,6 +142,33 @@ rgbM_1 = rgbbb.take([1])
 today_r4_data = raw_l4.loc[((raw_l4['Month'] == selected_type.month) & (raw_l4['Day'] == selected_type.day))]
 
 if(not today_r4_data.empty):
+    # ---------------------------------------------------- PIE CHART SERVICE -----------------------------------------------------
+    service_this_month_data = raw_l4.loc[((raw_l4['Divisi'] == service_name) & (raw_l4['Month'] == selected_type.month) & (raw_l4['Day'] <= selected_type.day))]
+    rev_service = (service_this_month_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
+    # rev_service = (service_this_month_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
+    # current_month_data_all = raw_data23.loc[((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day))]
+    # rev_service = (current_month_data_all.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index()
+
+    rev_service = rev_service.set_index('Service')
+    rev_service_top5 = rev_service.iloc[:5]
+    
+    rev_service = rev_service_top5
+
+    # rev_service = rev_service[(rev_service.index == 'Digital Banking') | (rev_service.index == 'Digital Music')| (rev_service.index == 'Games Marketplace') | (rev_service.index == 'VAS Content') | (rev_service.index == 'Video')]
+    rev_service['Rev_sum'] = rev_service['Rev_sum'].apply(lambda x: "{:.2f}".format(x/1000000000))
+
+    serviceChart = px.pie(rev_service, values='Rev_sum', names=rev_service.index, color_discrete_sequence= PIE_COLOR)
+
+    serviceChart.update_layout(showlegend=False)
+
+    serviceChart.update_traces(
+        texttemplate = "%{label} <br> %{value}B <br>(%{percent})", 
+        textfont_size=14
+        # textposition='inside',
+        # textposition = ifelse(df$freq<5,"outside","inside"),
+        # insidetextorientation='horizontal'
+        )
+
     # ------------------------------------------------------ TABLE TOP 5 M -------------------------------------------------------
     l4_this_month_data = raw_l4.loc[((raw_l4['Divisi'] == service_name) & (raw_l4['Month'] == selected_type.month) & (raw_l4['Day'] <= selected_type.day))]
     top_5 = (l4_this_month_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
@@ -378,7 +391,12 @@ def createServiceUI():
     with col7:
         st.subheader("By Service")
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
-        st.plotly_chart(serviceChart, use_container_width=True)
+        if(today_r4_data.empty):
+            st.write("Data not updated until selected date")
+        elif(l4_this_month_data.empty):
+            st.write("No data for selected service")
+        else:
+            st.plotly_chart(serviceChart, use_container_width=True)
 
     col8, col9, col10 = st.columns([11,12,9])
     with col8:
