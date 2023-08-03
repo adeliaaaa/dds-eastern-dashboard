@@ -29,7 +29,7 @@ def load_data(type):
     )
 
     db_cursor = connection.cursor()
-    # db_cursor.execute('SET workload = OLAP')
+    db_cursor.execute('SET workload = OLAP')
     db_cursor.execute('SELECT rev_date, cluster, rev_sum, month, date, divisi FROM digital_2022 WHERE reg = "EASTERN JABOTABEK"')
     table_rows = db_cursor.fetchall()
     raw_data22 = pd.DataFrame(table_rows)
