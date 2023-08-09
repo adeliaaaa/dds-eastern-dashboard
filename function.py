@@ -9,7 +9,15 @@ import pymysql
 # ----------------------------------------------------------- CONST ----------------------------------------------------------
 PIE_COLOR = px.colors.sequential.Burgyl
 TARGET_REVENUE_EASTERN = 46671504423.89
+TARGET_REVENUE_BEKASI = 15348571770
+TARGET_REVENUE_BOGOR = 15304321366
+TARGET_REVENUE_KARAWANG = 16018611287
+
 TARGET_REVENUE_DAILY_EASTERN = 1555716814.13
+TARGET_REVENUE_DAILY_BEKASI = 511619059
+TARGET_REVENUE_DAILY_BOGOR = 510144045.5
+TARGET_REVENUE_DAILY_KARAWANG = 533953709.6
+
 
 IMAGE_DOWN = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
 IMAGE_UP = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8')
@@ -226,3 +234,15 @@ def serviceToDigitalNameFormat(service):
     elif(service == 'DIGITAL BANKING'):
         new_service = 'Digital Banking'
     return new_service
+
+def branchToCluster(branch):
+    if(branch == 'EASTERN JABOTABEK'):
+        return ['KOTA BEKASI', 'DEPOK', 'BOGOR', 'SUKABUMI', 'BEKASI', 'KARAWANG PURWAKARTA']
+    elif(branch == 'BEKASI'):
+        return ['KOTA BEKASI', 'DEPOK']
+    elif(branch == 'BOGOR'):
+        return ['BOGOR', 'SUKABUMI']
+    elif(branch == 'KARAWANG PURWAKARTA'):
+        return ['BEKASI', 'KARAWANG PURWAKARTA']
+    else:
+        return ['KOTA BEKASI', 'DEPOK', 'BOGOR', 'SUKABUMI', 'BEKASI', 'KARAWANG PURWAKARTA']

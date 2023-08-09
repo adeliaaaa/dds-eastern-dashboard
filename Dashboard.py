@@ -5,7 +5,7 @@ import plotly.express as px
 
 import plotly.graph_objects as go
 
-from function import regexFromDate2022, regexFromDate2022OneMonth, color_negative_to_red, PIE_COLOR, load_data, addCustomStyle, TARGET_REVENUE_EASTERN, IMAGE_DOWN, IMAGE_UP, TARGET_REVENUE_DAILY_EASTERN
+from function import regexFromDate2022, regexFromDate2022OneMonth, color_negative_to_red, PIE_COLOR, load_data, addCustomStyle, branchToCluster, TARGET_REVENUE_EASTERN, TARGET_REVENUE_BEKASI, TARGET_REVENUE_BOGOR, TARGET_REVENUE_KARAWANG, IMAGE_DOWN, IMAGE_UP, TARGET_REVENUE_DAILY_EASTERN, TARGET_REVENUE_DAILY_BEKASI, TARGET_REVENUE_DAILY_BOGOR, TARGET_REVENUE_DAILY_KARAWANG
 from numerize import numerize
 
 st.set_page_config(layout="wide")
@@ -59,26 +59,49 @@ with colb:
 with colc:
     selected_branch = st.selectbox(
         'EASTERN JABOTABEK',
-        ('EASTERN JABOTABEK', 'BEKASI', 'BOGOR', 'KARAWANG'), label_visibility="hidden"
+        ('EASTERN JABOTABEK', 'BEKASI', 'BOGOR', 'KARAWANG PURWAKARTA'), label_visibility="hidden"
     ) 
 
 # -------------------------------------------------------- TOTAL REV ---------------------------------------------------------
-total_rev_number_M = raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+list_cluster_in_branch = branchToCluster(selected_branch)
+raw_data23_branch = raw_data23.loc[raw_data23['Cluster'].isin(list_cluster_in_branch)]
+raw_data22_branch = raw_data22.loc[raw_data22['Cluster'].isin(list_cluster_in_branch)]
+# if(selected_branch == 'EASTERN JABOTABEK'):
+#     raw_data23_branch = raw_data23
+#     raw_data22_branch = raw_data22
+# else:
+#     raw_data23_branch = raw_data23.loc[raw_data23['Cluster'] == selected_branch]
+#     raw_data22_branch = raw_data22.loc[raw_data22['Cluster'] == selected_branch]
+
+total_rev_number_M = raw_data23_branch.loc[(raw_data23_branch['Month'] == selected_type.month) & (raw_data23_branch['Date'] <= selected_type.day), 'Rev_sum'].sum()
 if(selected_type.month == 1):
-    total_rev_number_M_1 = raw_data22.loc[(raw_data22['Month'] == 12) & (raw_data22['Date'] <= selected_type.day), 'Rev_sum'].sum()
+    total_rev_number_M_1 = raw_data22_branch.loc[(raw_data22_branch['Month'] == 12) & (raw_data22_branch['Date'] <= selected_type.day), 'Rev_sum'].sum()
 else:
-    total_rev_number_M_1 = raw_data23.loc[(raw_data23['Month'] == (selected_type.month - 1)) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+    total_rev_number_M_1 = raw_data23_branch.loc[(raw_data23_branch['Month'] == (selected_type.month - 1)) & (raw_data23_branch['Date'] <= selected_type.day), 'Rev_sum'].sum()
 
-# -------------------------------------------------------- DAILY REV ---------------------------------------------------------
+# ------------------------------------------------ DAILY REV & REV TO TARGET -------------------------------------------------
 daily_rev = total_rev_number_M / selected_type.day
-# daily_rev_gap = numerize.numerize(float(daily_rev - target_revenue_daily_eastern))
-daily_rev_gap = numerize.numerize(float(daily_rev - TARGET_REVENUE_DAILY_EASTERN))
 
-# ------------------------------------------------------ REV TO TARGET -------------------------------------------------------
-# rev_to_target_number = float(total_rev_number_M) / target_revenue_eastern * 100
-# rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - target_revenue_eastern)
-rev_to_target_number = float(total_rev_number_M) / TARGET_REVENUE_EASTERN * 100
-rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - TARGET_REVENUE_EASTERN)
+if(selected_branch == 'EASTERN JABOTABEK'):
+    daily_rev_gap = numerize.numerize(float(daily_rev - TARGET_REVENUE_DAILY_EASTERN))
+    rev_to_target_number = float(total_rev_number_M) / TARGET_REVENUE_EASTERN * 100
+    rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - TARGET_REVENUE_EASTERN)
+elif(selected_branch == 'BEKASI'):
+    daily_rev_gap = numerize.numerize(float(daily_rev - TARGET_REVENUE_DAILY_BEKASI))
+    rev_to_target_number = float(total_rev_number_M) / TARGET_REVENUE_BEKASI * 100
+    rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - TARGET_REVENUE_BEKASI)
+elif(selected_branch == 'BOGOR'):
+    daily_rev_gap = numerize.numerize(float(daily_rev - TARGET_REVENUE_DAILY_BOGOR))
+    rev_to_target_number = float(total_rev_number_M) / TARGET_REVENUE_BOGOR * 100
+    rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - TARGET_REVENUE_BOGOR)
+elif(selected_branch == 'KARAWANG PURWAKARTA'):
+    daily_rev_gap = numerize.numerize(float(daily_rev - TARGET_REVENUE_DAILY_KARAWANG))
+    rev_to_target_number = float(total_rev_number_M) / TARGET_REVENUE_KARAWANG * 100
+    rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - TARGET_REVENUE_KARAWANG)
+else:
+    daily_rev_gap = numerize.numerize(float(daily_rev - TARGET_REVENUE_DAILY_EASTERN))
+    rev_to_target_number = float(total_rev_number_M) / TARGET_REVENUE_EASTERN * 100
+    rev_to_target_gap = numerize.numerize(float(total_rev_number_M) - TARGET_REVENUE_EASTERN)
 
 # ----------------------------------------------------------- MoM ------------------------------------------------------------
 MoM = numerize.numerize(((total_rev_number_M / total_rev_number_M_1) - 1) * 100)
