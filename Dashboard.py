@@ -109,15 +109,15 @@ MoM_gap = numerize.numerize(float(total_rev_number_M - total_rev_number_M_1))
 
 # ----------------------------------------------------------- Y-1 ------------------------------------------------------------
 y_1_date = datetime.datetime(2022, selected_type.month, selected_type.day)
-total_rev_2022 = raw_data22.loc[(raw_data22['Month'] <= selected_type.month -1) | ((raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day)), 'Rev_sum'].sum()
-total_rev_2023 = raw_data23.loc[(raw_data23['Month'] <= selected_type.month -1) | ((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day)), 'Rev_sum'].sum()
+total_rev_2022 = raw_data22_branch.loc[(raw_data22_branch['Month'] <= selected_type.month -1) | ((raw_data22_branch['Month'] == selected_type.month) & (raw_data22_branch['Date'] <= selected_type.day)), 'Rev_sum'].sum()
+total_rev_2023 = raw_data23_branch.loc[(raw_data23_branch['Month'] <= selected_type.month -1) | ((raw_data23_branch['Month'] == selected_type.month) & (raw_data23_branch['Date'] <= selected_type.day)), 'Rev_sum'].sum()
 
 # ----------------------------------------------------------- YtD ------------------------------------------------------------
 YtD = numerize.numerize(((total_rev_2023 / total_rev_2022) - 1) * 100)
 YtD_gap = numerize.numerize(float(total_rev_2023 - total_rev_2022))
 
 # ----------------------------------------------------------- YoY ------------------------------------------------------------
-total_rev__number_M_22 = raw_data22.loc[(raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day), 'Rev_sum'].sum()
+total_rev__number_M_22 = raw_data22_branch.loc[(raw_data22_branch['Month'] == selected_type.month) & (raw_data22_branch['Date'] <= selected_type.day), 'Rev_sum'].sum()
 YoY = numerize.numerize(((total_rev_number_M / total_rev__number_M_22) - 1) * 100)
 YoY_gap = numerize.numerize(float(total_rev_number_M - total_rev__number_M_22))
 
