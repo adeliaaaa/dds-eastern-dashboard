@@ -46,7 +46,7 @@ outlet_data['Rev_sum'] = outlet_data['Rev_sum'].astype('int')
 
 
 # ---------------------------------------------------------- HEADER ----------------------------------------------------------
-cola, colb = st.columns([6,1])
+cola, colb, colc = st.columns([9, 1, 2])
 with cola:
     st.title(':red[DDS REGIONAL] EASTERN')
 with colb:
@@ -56,6 +56,11 @@ with colb:
     max_value=max_date_data,
     min_value=datetime.datetime(2023, 1, 1),
     label_visibility="hidden")
+with colc:
+    selected_branch = st.selectbox(
+        'EASTERN JABOTABEK',
+        ('EASTERN JABOTABEK', 'BEKASI', 'BOGOR', 'KARAWANG'), label_visibility="hidden"
+    ) 
 
 # -------------------------------------------------------- TOTAL REV ---------------------------------------------------------
 total_rev_number_M = raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
