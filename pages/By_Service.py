@@ -6,6 +6,7 @@ import base64
 import plotly.graph_objects as go
 
 from function import regexFromDate2022, regexFromDate2022OneMonth, color_negative_to_red, PIE_COLOR, load_data, addCustomStyle, serviceToDigitalNameFormat, TARGET_REVENUE_EASTERN, IMAGE_DOWN, IMAGE_UP, branchToCluster
+from function import TARGET_REVENUE_BEKASI, TARGET_REVENUE_BOGOR, TARGET_REVENUE_KARAWANG
 from numerize import numerize
 
 st.set_page_config(layout="wide")
@@ -18,7 +19,7 @@ addCustomStyle()
 max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data = load_data('Service')
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
-raw_rgb_all.columns = ['Date', 'Subs', 'Divisi']
+raw_rgb_all.columns = ['Date', 'Subs', 'Divisi', 'Cluster']
 raw_l4.columns = ['Service', 'Rev_sum', 'Month', 'Day', 'Divisi', 'Cluster']
 raw_l4_2022.columns = ['Date', 'Service', 'Rev_sum', 'Cluster']
 raw_outlet.columns = ['Cluster', 'Outlet Register']
@@ -71,7 +72,7 @@ service_name = serviceToDigitalNameFormat(selected_service)
 raw_data23_branch = raw_data23.loc[raw_data23['Cluster'].isin(list_cluster_in_branch)]
 raw_data22_branch = raw_data22.loc[raw_data22['Cluster'].isin(list_cluster_in_branch)]
 
-total_rev_box = raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+total_rev_box = raw_data23_branch.loc[(raw_data23_branch['Month'] == selected_type.month) & (raw_data23_branch['Date'] <= selected_type.day), 'Rev_sum'].sum()
 total_rev_number_M = raw_data23_branch.loc[(raw_data23_branch['Service'] == service_name) & (raw_data23_branch['Month'] == selected_type.month) & (raw_data23_branch['Date'] <= selected_type.day), 'Rev_sum'].sum()
 if(selected_type.month == 1):
     total_rev_number_M_1 = raw_data22_branch.loc[(raw_data22_branch['Service'] == service_name) & (raw_data22_branch['Month'] == 12) & (raw_data22_branch['Date'] <= selected_type.day), 'Rev_sum'].sum()
@@ -82,8 +83,21 @@ else:
 daily_rev = numerize.numerize(total_rev_number_M / selected_type.day)
 
 # ------------------------------------------------------ REV TO TARGET -------------------------------------------------------
-rev_to_target_number = float(total_rev_box) / TARGET_REVENUE_EASTERN * 100
-rev_to_target_gap = numerize.numerize(float(total_rev_box) - TARGET_REVENUE_EASTERN)
+if(selected_branch == 'EASTERN JABOTABEK'):
+    rev_to_target_number = float(total_rev_box) / TARGET_REVENUE_EASTERN * 100
+    rev_to_target_gap = numerize.numerize(float(total_rev_box) - TARGET_REVENUE_EASTERN)
+elif(selected_branch == 'BEKASI'):
+    rev_to_target_number = float(total_rev_box) / TARGET_REVENUE_BEKASI * 100
+    rev_to_target_gap = numerize.numerize(float(total_rev_box) - TARGET_REVENUE_BEKASI)
+elif(selected_branch == 'BOGOR'):
+    rev_to_target_number = float(total_rev_box) / TARGET_REVENUE_BOGOR * 100
+    rev_to_target_gap = numerize.numerize(float(total_rev_box) - TARGET_REVENUE_BOGOR)
+elif(selected_branch == 'KARAWANG PURWAKARTA'):
+    rev_to_target_number = float(total_rev_box) / TARGET_REVENUE_KARAWANG * 100
+    rev_to_target_gap = numerize.numerize(float(total_rev_box) - TARGET_REVENUE_KARAWANG)
+else:
+    rev_to_target_number = float(total_rev_box) / TARGET_REVENUE_EASTERN * 100
+    rev_to_target_gap = numerize.numerize(float(total_rev_box) - TARGET_REVENUE_EASTERN)
 
 # ----------------------------------------------------------- MoM ------------------------------------------------------------
 MoM = numerize.numerize(((total_rev_number_M / total_rev_number_M_1) - 1) * 100)
@@ -91,15 +105,15 @@ MoM_gap = numerize.numerize(float(total_rev_number_M - total_rev_number_M_1))
 
 # ----------------------------------------------------------- Y-1 ------------------------------------------------------------
 y_1_date = datetime.datetime(2022, selected_type.month, selected_type.day)
-total_rev_2022 = raw_data22.loc[(raw_data22['Service'] == service_name) & ((raw_data22['Month'] <= selected_type.month -1) | ((raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day))), 'Rev_sum'].sum()
-total_rev_2023 = raw_data23.loc[(raw_data23['Service'] == service_name) & ((raw_data23['Month'] <= selected_type.month -1) | ((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day))), 'Rev_sum'].sum()
+total_rev_2022 = raw_data22_branch.loc[(raw_data22_branch['Service'] == service_name) & ((raw_data22_branch['Month'] <= selected_type.month -1) | ((raw_data22_branch['Month'] == selected_type.month) & (raw_data22_branch['Date'] <= selected_type.day))), 'Rev_sum'].sum()
+total_rev_2023 = raw_data23_branch.loc[(raw_data23_branch['Service'] == service_name) & ((raw_data23_branch['Month'] <= selected_type.month -1) | ((raw_data23_branch['Month'] == selected_type.month) & (raw_data23_branch['Date'] <= selected_type.day))), 'Rev_sum'].sum()
 
 # ----------------------------------------------------------- YtD ------------------------------------------------------------
 YtD = numerize.numerize(((total_rev_2023 / total_rev_2022) - 1) * 100)
 YtD_gap = numerize.numerize(float(total_rev_2023 - total_rev_2022))
 
 # ----------------------------------------------------------- YoY ------------------------------------------------------------
-total_rev__number_M_22 = raw_data22.loc[(raw_data22['Service'] == service_name) & (raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day), 'Rev_sum'].sum()
+total_rev__number_M_22 = raw_data22_branch.loc[(raw_data22_branch['Service'] == service_name) & (raw_data22_branch['Month'] == selected_type.month) & (raw_data22_branch['Date'] <= selected_type.day), 'Rev_sum'].sum()
 YoY = numerize.numerize(((total_rev_number_M / total_rev__number_M_22) - 1) * 100)
 YoY_gap = numerize.numerize(float(total_rev_number_M - total_rev__number_M_22))
 
@@ -145,7 +159,8 @@ clusterChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percen
 
 
 # ------------------------------------------------------------ RGB -----------------------------------------------------------
-raw_rgb_service = raw_rgb_all.loc[(raw_rgb_all['Divisi'] == service_name)]
+raw_rgb_all_branch = raw_rgb_all.loc[(raw_rgb_all['Cluster'].isin(list_cluster_in_branch))]
+raw_rgb_service = raw_rgb_all_branch.loc[(raw_rgb_all_branch['Divisi'] == service_name)]
 rgbbb = (raw_rgb_service.groupby(['Date'])['Subs'].sum()).to_frame().reset_index().sort_values('Date', ascending=False)
 rgbM = rgbbb.take([0])
 rgbM_1 = rgbbb.take([1])

@@ -56,7 +56,7 @@ def load_data(type):
         table_rows = db_cursor.fetchall()
         rgb_all = pd.DataFrame(table_rows)
     else:
-        db_cursor.execute('SELECT bulan, subs, divisi FROM rgb_service WHERE reg="06.Eastern Jabotabek"')
+        db_cursor.execute('SELECT bulan, subs, divisi, cluster FROM rgb_service WHERE reg="06.Eastern Jabotabek"')
         table_rows = db_cursor.fetchall()
         rgb_all = pd.DataFrame(table_rows)
 
