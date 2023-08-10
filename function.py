@@ -52,7 +52,7 @@ def load_data(type):
     max_date_data = datetime.datetime.strptime(max_date_data[0][0], "%d/%m/%Y")
 
     if(type == 'All'):
-        db_cursor.execute('SELECT bulan, subs FROM rgb_all WHERE reg="06.Eastern Jabotabek"')
+        db_cursor.execute('SELECT bulan, subs, cluster FROM rgb_all WHERE reg="06.Eastern Jabotabek"')
         table_rows = db_cursor.fetchall()
         rgb_all = pd.DataFrame(table_rows)
     else:

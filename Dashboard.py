@@ -18,7 +18,7 @@ addCustomStyle()
 max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_outlet, outlet_data = load_data('All')
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
-raw_rgb_all.columns = ['Date', 'Subs']
+raw_rgb_all.columns = ['Date', 'Subs', 'Cluster']
 raw_l4.columns = ['Service', 'Rev_sum', 'Month', 'Day', 'Divisi']
 raw_l4_2022.columns = ['Date', 'Service', 'Rev_sum']
 raw_outlet.columns = ['Cluster', 'Outlet Register']
@@ -177,7 +177,9 @@ clusterChart.update_traces(texttemplate = "%{label} <br> %{value}B <br>(%{percen
 
 
 # ------------------------------------------------------------ RGB -----------------------------------------------------------
-rgbbb = (raw_rgb_all.groupby(['Date'])['Subs'].sum()).to_frame().reset_index().sort_values('Date', ascending=False)
+raw_rgb_all_branch = raw_rgb_all.loc[(raw_rgb_all['Cluster'].isin(list_cluster_in_branch))]
+# raw_rgb_all_branch
+rgbbb = (raw_rgb_all_branch.groupby(['Date'])['Subs'].sum()).to_frame().reset_index().sort_values('Date', ascending=False)
 rgbM = rgbbb.take([0])
 rgbM_1 = rgbbb.take([1])
 
