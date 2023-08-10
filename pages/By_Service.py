@@ -5,7 +5,7 @@ import plotly.express as px
 import base64
 import plotly.graph_objects as go
 
-from function import regexFromDate2022, regexFromDate2022OneMonth, color_negative_to_red, PIE_COLOR, load_data, addCustomStyle, serviceToDigitalNameFormat, TARGET_REVENUE_EASTERN, IMAGE_DOWN, IMAGE_UP
+from function import regexFromDate2022, regexFromDate2022OneMonth, color_negative_to_red, PIE_COLOR, load_data, addCustomStyle, serviceToDigitalNameFormat, TARGET_REVENUE_EASTERN, IMAGE_DOWN, IMAGE_UP, branchToCluster
 from numerize import numerize
 
 st.set_page_config(layout="wide")
@@ -65,13 +65,18 @@ with cola:
     st.write(f'<div style="font-weight: 1000; height:100%; display: flex; justify-content: flex-start; font-size:2.7vw;"> {selected_service} </div>', unsafe_allow_html=True)
 
 # -------------------------------------------------------- TOTAL REV ---------------------------------------------------------
+list_cluster_in_branch = branchToCluster(selected_branch)
 service_name = serviceToDigitalNameFormat(selected_service)
+
+raw_data23_branch = raw_data23.loc[raw_data23['Cluster'].isin(list_cluster_in_branch)]
+raw_data22_branch = raw_data22.loc[raw_data22['Cluster'].isin(list_cluster_in_branch)]
+
 total_rev_box = raw_data23.loc[(raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
-total_rev_number_M = raw_data23.loc[(raw_data23['Service'] == service_name) & (raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+total_rev_number_M = raw_data23_branch.loc[(raw_data23_branch['Service'] == service_name) & (raw_data23_branch['Month'] == selected_type.month) & (raw_data23_branch['Date'] <= selected_type.day), 'Rev_sum'].sum()
 if(selected_type.month == 1):
-    total_rev_number_M_1 = raw_data22.loc[(raw_data22['Service'] == service_name) & (raw_data22['Month'] == 12) & (raw_data22['Date'] <= selected_type.day), 'Rev_sum'].sum()
+    total_rev_number_M_1 = raw_data22_branch.loc[(raw_data22_branch['Service'] == service_name) & (raw_data22_branch['Month'] == 12) & (raw_data22_branch['Date'] <= selected_type.day), 'Rev_sum'].sum()
 else:
-    total_rev_number_M_1 = raw_data23.loc[(raw_data23['Service'] == service_name) & (raw_data23['Month'] == (selected_type.month - 1)) & (raw_data23['Date'] <= selected_type.day), 'Rev_sum'].sum()
+    total_rev_number_M_1 = raw_data23_branch.loc[(raw_data23_branch['Service'] == service_name) & (raw_data23_branch['Month'] == (selected_type.month - 1)) & (raw_data23_branch['Date'] <= selected_type.day), 'Rev_sum'].sum()
 
 # -------------------------------------------------------- DAILY REV ---------------------------------------------------------
 daily_rev = numerize.numerize(total_rev_number_M / selected_type.day)
