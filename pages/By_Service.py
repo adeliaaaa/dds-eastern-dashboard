@@ -38,7 +38,7 @@ cola, colb = st.columns([6,6])
 with colb:
     st.write(f'<div style="font-weight: 600; height:100%; display: flex; justify-content: flex-end; font-size:2vw; color:red;"> DDS REGIONAL <div class="eastern-color"> EASTERN </div></div>', unsafe_allow_html=True)
 
-colc, cold, cole = st.columns([9,2,2])
+colc, cold, cole, colf = st.columns([8,2,2,2])
 
 with cold:
     selected_type = cold.date_input(
@@ -53,6 +53,12 @@ with cole:
     selected_service = st.selectbox(
         'Games',
         ('GAMES MARKETPLACE', 'VIDEO', 'DIGITAL MUSIC', 'VAS CONTENT', 'DIGITAL BANKING'), label_visibility="hidden"
+    ) 
+
+with colf:
+    selected_branch = st.selectbox(
+        'EASTERN JABOTABEK',
+        ('EASTERN JABOTABEK', 'BEKASI', 'BOGOR', 'KARAWANG PURWAKARTA'), label_visibility="hidden"
     ) 
 
 with cola:
