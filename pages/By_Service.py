@@ -19,8 +19,8 @@ max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_out
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_rgb_all.columns = ['Date', 'Subs', 'Divisi']
-raw_l4.columns = ['Service', 'Rev_sum', 'Month', 'Day', 'Divisi']
-raw_l4_2022.columns = ['Date', 'Service', 'Rev_sum']
+raw_l4.columns = ['Service', 'Rev_sum', 'Month', 'Day', 'Divisi', 'Cluster']
+raw_l4_2022.columns = ['Date', 'Service', 'Rev_sum', 'Cluster']
 raw_outlet.columns = ['Cluster', 'Outlet Register']
 outlet_data.columns = ['Cluster', 'Outlet', 'Rev_sum']
 raw_data23['Month'] = raw_data23['Month'].astype('int')

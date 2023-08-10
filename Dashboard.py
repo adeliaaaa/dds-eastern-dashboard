@@ -19,8 +19,8 @@ max_date_data, raw_data22, raw_data23, raw_rgb_all, raw_l4, raw_l4_2022, raw_out
 raw_data22.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_data23.columns = ['Rev_Date', 'Cluster', 'Rev_sum', 'Month', 'Date', 'Service']
 raw_rgb_all.columns = ['Date', 'Subs', 'Cluster']
-raw_l4.columns = ['Service', 'Rev_sum', 'Month', 'Day', 'Divisi']
-raw_l4_2022.columns = ['Date', 'Service', 'Rev_sum']
+raw_l4.columns = ['Service', 'Rev_sum', 'Month', 'Day', 'Divisi', 'Cluster']
+raw_l4_2022.columns = ['Date', 'Service', 'Rev_sum', 'Cluster']
 raw_outlet.columns = ['Cluster', 'Outlet Register']
 outlet_data.columns = ['Cluster', 'Outlet', 'Rev_sum']
 # eastern_jabotabek_all_revenue.columns = ['Keterangan', 'Value']
@@ -186,9 +186,11 @@ rgbM_1 = rgbbb.take([1])
 today_r4_data = raw_l4.loc[((raw_l4['Month'] == selected_type.month) & (raw_l4['Day'] == selected_type.day))]
 
 if(not today_r4_data.empty):
+    raw_l4_branch = raw_l4.loc[(raw_l4['Cluster'].isin(list_cluster_in_branch))]
+    raw_l4_2022_branch = raw_l4_2022.loc[(raw_l4_2022['Cluster'].isin(list_cluster_in_branch))]
     # ------------------------------------------------------ TABLE TOP 5 M -------------------------------------------------------
     top_5_m = pd.DataFrame()
-    l4_this_month_data = raw_l4.loc[((raw_l4['Month'] == selected_type.month) & (raw_l4['Day'] <= selected_type.day))]
+    l4_this_month_data = raw_l4_branch.loc[((raw_l4_branch['Month'] == selected_type.month) & (raw_l4_branch['Day'] <= selected_type.day))]
     top_5 = (l4_this_month_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
     top_5.columns = ['Service', 'M']
     top_5 = top_5.head(5)
@@ -197,10 +199,10 @@ if(not today_r4_data.empty):
     # ----------------------------------------------------- TABLE TOP 5 M-1 ------------------------------------------------------
     if(selected_type.month == 1):
         regex_dec_month_2022 = regexFromDate2022OneMonth(selected_type.day, 12)
-        l4_2022_dec = raw_l4_2022[raw_l4_2022.Date.str.contains(regex_dec_month_2022, regex=True, na=False)]
+        l4_2022_dec = raw_l4_2022_branch[raw_l4_2022_branch.Date.str.contains(regex_dec_month_2022, regex=True, na=False)]
         l4_this_month_1_data = l4_2022_dec.loc[(l4_2022_dec['Service'].isin(top_5['Service']))]
     else:
-        l4_this_month_1_data = raw_l4.loc[(raw_l4['Month'] == selected_type.month-1) & (raw_l4['Day'] <= selected_type.day) & (raw_l4['Service'].isin(top_5['Service']))]
+        l4_this_month_1_data = raw_l4_branch.loc[(raw_l4_branch['Month'] == selected_type.month-1) & (raw_l4_branch['Day'] <= selected_type.day) & (raw_l4_branch['Service'].isin(top_5['Service']))]
 
     top_5_M_1 = (l4_this_month_1_data.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
     top_5_M_1.columns = ['Service', 'M-1']
@@ -211,12 +213,12 @@ if(not today_r4_data.empty):
 
     # ----------------------------------------------------- TABLE TOP 5 YtD ------------------------------------------------------
     regex_final = regexFromDate2022(selected_type.day, selected_type.month)
-    l4_2022_until_now = raw_l4_2022[raw_l4_2022.Date.str.contains(regex_final, regex=True, na=False)]
+    l4_2022_until_now = raw_l4_2022_branch[raw_l4_2022_branch.Date.str.contains(regex_final, regex=True, na=False)]
     top_5_2022 = l4_2022_until_now.loc[l4_2022_until_now['Service'].isin(top_5['Service'])]
     top_5_2022 = (top_5_2022.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
     top_5_2022.columns = ['Service', '2022']
 
-    l4_2023_until_now = raw_l4.loc[ (raw_l4['Month'] <= selected_type.month - 1) | ((raw_l4['Month'] == selected_type.month) & (raw_l4['Day'] <= selected_type.day))]
+    l4_2023_until_now = raw_l4_branch.loc[ (raw_l4_branch['Month'] <= selected_type.month - 1) | ((raw_l4_branch['Month'] == selected_type.month) & (raw_l4_branch['Day'] <= selected_type.day))]
     top_5_2023 = l4_2023_until_now.loc[l4_2023_until_now['Service'].isin(top_5['Service'])]
     top_5_2023 = (top_5_2023.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
     top_5_2023.columns = ['Service', '2023']
@@ -227,7 +229,7 @@ if(not today_r4_data.empty):
 
     # ----------------------------------------------------- TABLE TOP 5 YoY ------------------------------------------------------
     regex_1_month_2022 = regexFromDate2022OneMonth(selected_type.day, selected_type.month)
-    l4_2022_1_month = raw_l4_2022[raw_l4_2022.Date.str.contains(regex_1_month_2022, regex=True, na=False)]
+    l4_2022_1_month = raw_l4_2022_branch[raw_l4_2022_branch.Date.str.contains(regex_1_month_2022, regex=True, na=False)]
     top_5_2022_1_month = l4_2022_1_month.loc[l4_2022_1_month['Service'].isin(top_5['Service'])]
     top_5_2022_1_month = (top_5_2022_1_month.groupby(['Service'])['Rev_sum'].sum()).to_frame().reset_index().sort_values('Rev_sum', ascending=False)
     top_5_2022_1_month.columns = ['Service', 'month-22']

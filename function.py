@@ -60,11 +60,11 @@ def load_data(type):
         table_rows = db_cursor.fetchall()
         rgb_all = pd.DataFrame(table_rows)
 
-    db_cursor.execute('SELECT service, rev_sum, month, day, divisi FROM l4 WHERE regional="EASTERN JABOTABEK"')
+    db_cursor.execute('SELECT service, rev_sum, month, day, divisi, cluster FROM l4 WHERE regional="EASTERN JABOTABEK"')
     table_rows = db_cursor.fetchall()
     l4 = pd.DataFrame(table_rows)
 
-    db_cursor.execute('SELECT event_date, l4, rev_sum FROM l4_2022')
+    db_cursor.execute('SELECT event_date, l4, rev_sum, cluster FROM l4_2022')
     table_rows = db_cursor.fetchall()
     l4_2022 = pd.DataFrame(table_rows)
 
