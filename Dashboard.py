@@ -256,14 +256,30 @@ outlet = pd.merge(outlet, outlet_data, on='Cluster')
 outlet['%'] = (outlet['Outlet'] / outlet['Outlet Register']) * 100
 outlet = outlet.drop(['Outlet Register'], axis=1)
 
+outlet = outlet.loc[outlet['Cluster'].isin(list_cluster_in_branch)]
 outlet = outlet.set_index('Cluster')
-outlet.loc['EASTERN JABOTABEK']= outlet.sum(numeric_only=True)
+if(selected_branch == 'EASTERN JABOTABEK'):
+    outlet.loc['EASTERN JABOTABEK']= outlet.sum(numeric_only=True)
+else:
+    outlet.loc[f'BRANCH {selected_branch}']= outlet.sum(numeric_only=True)
 
 outlet['Outlet'] = outlet['Outlet'].astype('str')
 outlet['Rev_sum'] = outlet['Rev_sum'].apply(lambda x: "{:.2f}".format(x/1000000)).astype('str')
 outlet['%'] = outlet['%'].apply(lambda x: "{:.2f}%".format(x)).astype('str')
 
 outlet.columns = ['Outlet', 'Rev(M)', '%']
+
+outlet = outlet.reset_index()
+
+# def bg_colour_col (col):
+#     colour = '#f8f9fb'
+#     return ['background-color: %s' % colour 
+#                 if i==(len(col)-1)   # color column `Total` or row `4`
+#                 else ''
+#              for i,x in col.iteritems()]
+
+# outlet = outlet.style.apply(bg_colour_col)
+
 
 # ---------------------------------------------------------- DESIGN ----------------------------------------------------------
 def createUI():
@@ -438,6 +454,6 @@ def createUI():
     with col10:
         st.subheader("Outlet Digital Aktif & Rev")
         st.write("""<div class='PortMaker' style='margin:0px;'/>""", unsafe_allow_html=True)
-        st.dataframe(outlet, use_container_width=True, column_order=['Outlet', '%', 'Rev(M)'])
+        st.dataframe(outlet, use_container_width=True, column_order=['Cluster', 'Outlet', '%', 'Rev(M)'], hide_index=True)
 
 createUI()
