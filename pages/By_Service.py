@@ -118,23 +118,27 @@ YoY = numerize.numerize(((total_rev_number_M / total_rev__number_M_22) - 1) * 10
 YoY_gap = numerize.numerize(float(total_rev_number_M - total_rev__number_M_22))
 
 # -------------------------------------------------------- LINE CHART --------------------------------------------------------
-trend_monthly_rev_actual_data = raw_data23.loc[(raw_data23['Service'] == service_name) & (raw_data23['Month'] <= selected_type.month -1) | ((raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day))]
+trend_monthly_by_service = raw_data23_branch.loc[raw_data23_branch['Service'] == service_name]
+trend_monthly_rev_actual_data = trend_monthly_by_service.loc[(trend_monthly_by_service['Month'] <= selected_type.month -1) | ((trend_monthly_by_service['Month'] == selected_type.month) & (trend_monthly_by_service['Date'] <= selected_type.day))]
 trend_monthly_rev = (trend_monthly_rev_actual_data.groupby(['Month'])['Rev_sum'].sum()).to_frame().reset_index()
 trend_monthly_rev.columns = ['Month', 'Actual']
-trend_monthly_rev_YoY_data = raw_data22.loc[(raw_data23['Service'] == service_name) & (raw_data22['Month'] <= selected_type.month -1) | ((raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day))]
+
+trend_monthly_by_service_yoy = raw_data22_branch.loc[raw_data22_branch['Service'] == service_name]
+trend_monthly_rev_YoY_data = trend_monthly_by_service_yoy.loc[(trend_monthly_by_service_yoy['Month'] <= selected_type.month -1) | ((trend_monthly_by_service_yoy['Month'] == selected_type.month) & (trend_monthly_by_service_yoy['Date'] <= selected_type.day))]
 trend_monthly_rev_YoY = (trend_monthly_rev_YoY_data.groupby(['Month'])['Rev_sum'].sum()).to_frame().reset_index()
 trend_monthly_rev_YoY.columns = ['Month', 'Y-1']
+
 trend_monthly = pd.merge(trend_monthly_rev, trend_monthly_rev_YoY, on='Month')
 trend_monthly = trend_monthly.set_index('Month')
 trend_monthly.index = trend_monthly.index.astype(str)
 trend_monthly.rename(index={'1':'Jan', '2':'Feb', '3':'Mar', '4': 'Apr', '5': 'May', '6': 'Jun', '7': 'Jul', '8': 'Aug', '9': 'Sept', '10': 'Oct', '11': 'Nov', '12': 'Des'}, inplace=True)
 
-current_month_data = raw_data23.loc[((raw_data23['Service'] == service_name) & (raw_data23['Month'] == selected_type.month) & (raw_data23['Date'] <= selected_type.day))]
-Y_1_month_data = raw_data22.loc[((raw_data22['Service'] == service_name) & (raw_data22['Month'] == selected_type.month) & (raw_data22['Date'] <= selected_type.day))]
+current_month_data = raw_data23_branch.loc[((raw_data23_branch['Service'] == service_name) & (raw_data23_branch['Month'] == selected_type.month) & (raw_data23_branch['Date'] <= selected_type.day))]
+Y_1_month_data = raw_data22_branch.loc[((raw_data22_branch['Service'] == service_name) & (raw_data22_branch['Month'] == selected_type.month) & (raw_data22_branch['Date'] <= selected_type.day))]
 if(selected_type.month == 1):
-    M_1_data = raw_data22.loc[((raw_data22['Service'] == service_name) & (raw_data22['Month'] == 12) & (raw_data22['Date'] <= selected_type.day))]
+    M_1_data = raw_data22_branch.loc[((raw_data22_branch['Service'] == service_name) & (raw_data22_branch['Month'] == 12) & (raw_data22_branch['Date'] <= selected_type.day))]
 else: 
-    M_1_data = raw_data23.loc[((raw_data23['Service'] == service_name) & (raw_data23['Month'] == selected_type.month-1) & (raw_data23['Date'] <= selected_type.day))]
+    M_1_data = raw_data23_branch.loc[((raw_data23_branch['Service'] == service_name) & (raw_data23_branch['Month'] == selected_type.month-1) & (raw_data23_branch['Date'] <= selected_type.day))]
 trend_daily_rev = (current_month_data.groupby(['Date'])['Rev_sum'].sum()).to_frame().reset_index()
 trend_daily_rev.columns = ['Date', 'Actual']
 trend_daily_rev_M_1 = (M_1_data.groupby(['Date'])['Rev_sum'].sum()).to_frame().reset_index()
