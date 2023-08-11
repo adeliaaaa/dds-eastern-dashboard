@@ -9,7 +9,15 @@ import pymysql
 # ----------------------------------------------------------- CONST ----------------------------------------------------------
 PIE_COLOR = px.colors.sequential.Burgyl
 TARGET_REVENUE_EASTERN = 46671504423.89
+TARGET_REVENUE_BEKASI = 15348571770
+TARGET_REVENUE_BOGOR = 15304321366
+TARGET_REVENUE_KARAWANG = 16018611287
+
 TARGET_REVENUE_DAILY_EASTERN = 1555716814.13
+TARGET_REVENUE_DAILY_BEKASI = 511619059
+TARGET_REVENUE_DAILY_BOGOR = 510144045.5
+TARGET_REVENUE_DAILY_KARAWANG = 533953709.6
+
 
 IMAGE_DOWN = base64.b64encode(open('./assets/down.png', 'rb').read()).decode('utf-8')
 IMAGE_UP = base64.b64encode(open('./assets/up.png', 'rb').read()).decode('utf-8')
@@ -44,19 +52,19 @@ def load_data(type):
     max_date_data = datetime.datetime.strptime(max_date_data[0][0], "%d/%m/%Y")
 
     if(type == 'All'):
-        db_cursor.execute('SELECT bulan, subs FROM rgb_all WHERE reg="06.Eastern Jabotabek"')
+        db_cursor.execute('SELECT bulan, subs, cluster FROM rgb_all WHERE reg="06.Eastern Jabotabek"')
         table_rows = db_cursor.fetchall()
         rgb_all = pd.DataFrame(table_rows)
     else:
-        db_cursor.execute('SELECT bulan, subs, divisi FROM rgb_service WHERE reg="06.Eastern Jabotabek"')
+        db_cursor.execute('SELECT bulan, subs, divisi, cluster FROM rgb_service WHERE reg="06.Eastern Jabotabek"')
         table_rows = db_cursor.fetchall()
         rgb_all = pd.DataFrame(table_rows)
 
-    db_cursor.execute('SELECT service, rev_sum, month, day, divisi FROM l4 WHERE regional="EASTERN JABOTABEK"')
+    db_cursor.execute('SELECT service, rev_sum, month, day, divisi, cluster FROM l4 WHERE regional="EASTERN JABOTABEK"')
     table_rows = db_cursor.fetchall()
     l4 = pd.DataFrame(table_rows)
 
-    db_cursor.execute('SELECT event_date, l4, rev_sum FROM l4_2022')
+    db_cursor.execute('SELECT event_date, l4, rev_sum, cluster FROM l4_2022')
     table_rows = db_cursor.fetchall()
     l4_2022 = pd.DataFrame(table_rows)
 
@@ -226,3 +234,15 @@ def serviceToDigitalNameFormat(service):
     elif(service == 'DIGITAL BANKING'):
         new_service = 'Digital Banking'
     return new_service
+
+def branchToCluster(branch):
+    if(branch == 'EASTERN JABOTABEK'):
+        return ['KOTA BEKASI', 'DEPOK', 'BOGOR', 'SUKABUMI', 'BEKASI', 'KARAWANG PURWAKARTA']
+    elif(branch == 'BEKASI'):
+        return ['KOTA BEKASI', 'DEPOK']
+    elif(branch == 'BOGOR'):
+        return ['BOGOR', 'SUKABUMI']
+    elif(branch == 'KARAWANG PURWAKARTA'):
+        return ['BEKASI', 'KARAWANG PURWAKARTA']
+    else:
+        return ['KOTA BEKASI', 'DEPOK', 'BOGOR', 'SUKABUMI', 'BEKASI', 'KARAWANG PURWAKARTA']
